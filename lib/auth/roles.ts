@@ -100,22 +100,21 @@ export interface NavItem {
 /** Admin and Committee see 8 navigation items. */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { title: "Services", href: "/dashboard", icon: "Calendar" },
+  { title: "Teams", href: "/teams", icon: "Layers" },
   { title: "Team Roster", href: "/team-roster", icon: "Users" },
   { title: "Songs", href: "/songs", icon: "Music" },
   { title: "Announcements", href: "/announcements", icon: "Megaphone" },
   { title: "Equipment", href: "/equipment", icon: "Wrench" },
   { title: "Reports", href: "/reports", icon: "BarChart3" },
   { title: "Files", href: "/files", icon: "FolderOpen" },
-  { title: "My Profile", href: "/profile", icon: "UserCircle" },
 ];
 
-/** Members see 5 navigation items. */
+/** Members see 4 navigation items. */
 export const MEMBER_NAV_ITEMS: NavItem[] = [
   { title: "My Schedule", href: "/my-schedule", icon: "CalendarCheck" },
   { title: "Songs", href: "/songs", icon: "Music" },
   { title: "Announcements", href: "/announcements", icon: "Megaphone" },
   { title: "Files", href: "/files", icon: "FolderOpen" },
-  { title: "My Profile", href: "/profile", icon: "UserCircle" },
 ];
 
 /** Return the appropriate navigation items based on the user's role. */

@@ -6,6 +6,7 @@ import {
   CalendarCheck,
   ChevronsUpDown,
   FolderOpen,
+  Layers,
   LogOut,
   type LucideIcon,
   Megaphone,
@@ -56,6 +57,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Calendar,
   CalendarCheck,
   FolderOpen,
+  Layers,
   Megaphone,
   Music,
   Shield,
@@ -196,6 +198,15 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                     </span>
                   </div>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile">
+                      <UserCircle className="size-4" />
+                      My Profile
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem onClick={() => setTheme("light")}>
