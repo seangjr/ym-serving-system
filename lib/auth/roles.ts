@@ -1,48 +1,64 @@
-import type { Session } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 // ---------------------------------------------------------------------------
-// Role types — must match the SQL enum `public.app_role` exactly
+// Role types — based on role names in the existing `roles` table
 // ---------------------------------------------------------------------------
 
 export type AppRole = "admin" | "committee" | "member";
-
-export const ROLES = {
-  ADMIN: "admin" as const,
-  COMMITTEE: "committee" as const,
-  MEMBER: "member" as const,
-};
 
 // Role hierarchy: higher index = higher privilege
 const ROLE_HIERARCHY: AppRole[] = ["member", "committee", "admin"];
 
 // ---------------------------------------------------------------------------
-// JWT role extraction
+// DB-based role resolution
 // ---------------------------------------------------------------------------
 
-interface JwtWithRole {
-  user_role?: AppRole;
-}
-
 /**
- * Extract the user's role from a Supabase session JWT.
+ * Get the user's highest role by querying the database.
  *
- * The custom access token hook embeds `user_role` in JWT claims.
- * We decode the JWT payload manually (split + atob) to avoid adding
- * a `jwt-decode` dependency — the JWT is already verified by Supabase.
- *
- * Returns `'member'` if no session or no role claim is found.
+ * Uses the existing `members` → `assignments` → `roles` tables from ym-attend-4.
+ * Returns `'member'` as the safe default when no session, no member record, or
+ * no assignments are found.
  */
-export function getUserRole(session: Session | null): AppRole {
-  if (!session) return "member";
+export async function getUserRole(
+  supabase: SupabaseClient,
+): Promise<{ role: AppRole; memberId: string | null }> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { role: "member", memberId: null };
 
-  try {
-    const payload = session.access_token.split(".")[1];
-    if (!payload) return "member";
-    const claims = JSON.parse(atob(payload)) as JwtWithRole;
-    return claims?.user_role ?? "member";
-  } catch {
-    return "member";
-  }
+  // Find member by auth_user_id
+  const { data: member } = await supabase
+    .from("members")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .single();
+
+  if (!member) return { role: "member", memberId: null };
+
+  // Get all role assignments for this member
+  const { data: assignments } = await supabase
+    .from("assignments")
+    .select("roles(name)")
+    .eq("member_id", member.id);
+
+  if (!assignments || assignments.length === 0)
+    return { role: "member", memberId: member.id };
+
+  // Determine highest role (admin > committee > member)
+  const roleNames = assignments
+    .map((a: Record<string, unknown>) => {
+      const roles = a.roles as { name: string } | null;
+      return roles?.name;
+    })
+    .filter(Boolean) as string[];
+
+  if (roleNames.some((r: string) => r.toLowerCase() === "admin"))
+    return { role: "admin", memberId: member.id };
+  if (roleNames.some((r: string) => r.toLowerCase() === "committee"))
+    return { role: "committee", memberId: member.id };
+  return { role: "member", memberId: member.id };
 }
 
 // ---------------------------------------------------------------------------
@@ -102,7 +118,13 @@ export const MEMBER_NAV_ITEMS: NavItem[] = [
 
 /** Return the appropriate navigation items based on the user's role. */
 export function getNavItems(role: AppRole): NavItem[] {
-  return role === "member" ? MEMBER_NAV_ITEMS : ADMIN_NAV_ITEMS;
+  if (role === "admin")
+    return [
+      ...ADMIN_NAV_ITEMS,
+      { title: "Admin", href: "/admin", icon: "Shield" },
+    ];
+  if (role === "committee") return ADMIN_NAV_ITEMS;
+  return MEMBER_NAV_ITEMS;
 }
 
 /** Return the default landing route based on the user's role. */

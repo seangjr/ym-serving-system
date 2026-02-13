@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getUserRole } from "@/lib/auth/roles";
 import { AppSidebar } from "@/components/app-sidebar";
+import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
+import { getUserRole } from "@/lib/auth/roles";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({
   children,
@@ -25,11 +25,8 @@ export default async function AppLayout({
     redirect("/login");
   }
 
-  // Extract role from cached JWT claims
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const role = getUserRole(session);
+  // Resolve role from DB (members → assignments → roles)
+  const { role } = await getUserRole(supabase);
 
   return (
     <SidebarProvider>

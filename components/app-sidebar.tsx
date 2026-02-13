@@ -1,21 +1,20 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   BarChart3,
   Calendar,
   CalendarCheck,
   FolderOpen,
+  type LucideIcon,
   Megaphone,
   Music,
+  Shield,
   Users,
   Wrench,
-  type LucideIcon,
 } from "lucide-react";
-
-import type { AppRole, NavItem } from "@/lib/auth/roles";
-import { getNavItems } from "@/lib/auth/roles";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Sidebar,
   SidebarContent,
@@ -28,8 +27,9 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { UserNav } from "@/components/user-nav";
+import type { AppRole, NavItem } from "@/lib/auth/roles";
+import { getNavItems } from "@/lib/auth/roles";
 
 // ---------------------------------------------------------------------------
 // Icon resolver: maps string icon names from NavItem to Lucide components
@@ -42,6 +42,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   FolderOpen,
   Megaphone,
   Music,
+  Shield,
   Users,
   Wrench,
 };
