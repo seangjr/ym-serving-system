@@ -154,7 +154,6 @@ function AddPositionForm({
   const [isPending, startTransition] = useTransition();
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
-  const [quantityNeeded, setQuantityNeeded] = useState(1);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -165,7 +164,6 @@ function AddPositionForm({
         teamId,
         name: name.trim(),
         category: category.trim() || undefined,
-        quantityNeeded,
       });
 
       if ("error" in result) {
@@ -176,7 +174,6 @@ function AddPositionForm({
       toast.success(`Position "${name}" added`);
       setName("");
       setCategory("");
-      setQuantityNeeded(1);
       onComplete();
     });
   }
@@ -186,7 +183,7 @@ function AddPositionForm({
       onSubmit={handleSubmit}
       className="flex flex-col gap-3 rounded-lg border bg-muted/50 p-4"
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="pos-name" className="text-xs">
             Name
@@ -205,22 +202,9 @@ function AddPositionForm({
           </Label>
           <Input
             id="pos-category"
-            placeholder="e.g. Music"
+            placeholder="e.g. Musician"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="pos-qty" className="text-xs">
-            Qty Needed
-          </Label>
-          <Input
-            id="pos-qty"
-            type="number"
-            min={1}
-            max={20}
-            value={quantityNeeded}
-            onChange={(e) => setQuantityNeeded(Number(e.target.value))}
           />
         </div>
       </div>
@@ -290,16 +274,13 @@ function PositionRow({
       <div className="flex items-center gap-3 min-w-0">
         <div className="min-w-0">
           <p className="text-sm font-medium truncate">{position.name}</p>
-          <div className="flex items-center gap-2 mt-0.5">
-            {position.category && (
+          {position.category && (
+            <div className="flex items-center gap-2 mt-0.5">
               <Badge variant="secondary" className="text-xs">
                 {position.category}
               </Badge>
-            )}
-            <span className="text-xs text-muted-foreground">
-              Qty: {position.quantity_needed}
-            </span>
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -364,9 +345,6 @@ function EditPositionForm({
   const [isPending, startTransition] = useTransition();
   const [name, setName] = useState(position.name);
   const [category, setCategory] = useState(position.category ?? "");
-  const [quantityNeeded, setQuantityNeeded] = useState(
-    position.quantity_needed,
-  );
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -377,7 +355,6 @@ function EditPositionForm({
         id: position.id,
         name: name.trim(),
         category: category.trim() || undefined,
-        quantityNeeded,
       });
 
       if ("error" in result) {
@@ -395,7 +372,7 @@ function EditPositionForm({
       onSubmit={handleSubmit}
       className="flex flex-col gap-3 rounded-lg border bg-muted/50 p-3"
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Input
           placeholder="Position name"
           value={name}
@@ -406,13 +383,6 @@ function EditPositionForm({
           placeholder="Category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-        />
-        <Input
-          type="number"
-          min={1}
-          max={20}
-          value={quantityNeeded}
-          onChange={(e) => setQuantityNeeded(Number(e.target.value))}
         />
       </div>
       <div className="flex items-center gap-2 justify-end">

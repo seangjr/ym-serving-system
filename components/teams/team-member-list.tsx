@@ -421,7 +421,7 @@ function MemberActions({
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowSkillDialog(true)}>
             <UserCog className="size-4" />
-            Edit Skills
+            Assign Positions
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -547,9 +547,11 @@ function SkillEditDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit Skills - {member.full_name}</DialogTitle>
+          <DialogTitle>Assign Positions — {member.full_name}</DialogTitle>
           <DialogDescription>
-            Set proficiency and preference for each position.
+            For each position in this team, set how experienced this member is
+            (proficiency) and how much they want to serve in this role
+            (preference).
           </DialogDescription>
         </DialogHeader>
 
@@ -564,41 +566,57 @@ function SkillEditDialog({
               return (
                 <div key={pos.id} className="flex flex-col gap-2">
                   <Label className="text-sm font-medium">{pos.name}</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Select
-                      value={skill?.proficiency ?? "beginner"}
-                      onValueChange={(v) =>
-                        updateSkill(pos.id, "proficiency", v)
-                      }
-                    >
-                      <SelectTrigger size="sm">
-                        <SelectValue placeholder="Proficiency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {proficiencyLevels.map((level) => (
-                          <SelectItem key={level} value={level}>
-                            {level.charAt(0).toUpperCase() + level.slice(1)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Select
-                      value={skill?.preference ?? "willing"}
-                      onValueChange={(v) =>
-                        updateSkill(pos.id, "preference", v)
-                      }
-                    >
-                      <SelectTrigger size="sm">
-                        <SelectValue placeholder="Preference" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {preferenceLevels.map((level) => (
-                          <SelectItem key={level} value={level}>
-                            {level.charAt(0).toUpperCase() + level.slice(1)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Experience Level
+                      </span>
+                      <Select
+                        value={skill?.proficiency ?? "beginner"}
+                        onValueChange={(v) =>
+                          updateSkill(pos.id, "proficiency", v)
+                        }
+                      >
+                        <SelectTrigger size="sm">
+                          <SelectValue placeholder="Proficiency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {proficiencyLevels.map((level) => (
+                            <SelectItem key={level} value={level}>
+                              {level.charAt(0).toUpperCase() + level.slice(1)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        How skilled is this member at this position?
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Willingness
+                      </span>
+                      <Select
+                        value={skill?.preference ?? "willing"}
+                        onValueChange={(v) =>
+                          updateSkill(pos.id, "preference", v)
+                        }
+                      >
+                        <SelectTrigger size="sm">
+                          <SelectValue placeholder="Preference" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {preferenceLevels.map((level) => (
+                            <SelectItem key={level} value={level}>
+                              {level.charAt(0).toUpperCase() + level.slice(1)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        How much does this member want to serve here?
+                      </p>
+                    </div>
                   </div>
                 </div>
               );
@@ -618,7 +636,7 @@ function SkillEditDialog({
             onClick={handleSave}
             disabled={isPending || positions.length === 0}
           >
-            {isPending ? "Saving..." : "Save Skills"}
+            {isPending ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>

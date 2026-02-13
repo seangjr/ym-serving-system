@@ -120,7 +120,6 @@ export async function createPosition(
       team_id: parsed.data.teamId,
       name: parsed.data.name,
       category: parsed.data.category ?? null,
-      quantity_needed: parsed.data.quantityNeeded,
     })
     .select("id")
     .single();
@@ -153,8 +152,6 @@ export async function updatePosition(
   const updates: Record<string, unknown> = {};
   if (fields.name !== undefined) updates.name = fields.name;
   if (fields.category !== undefined) updates.category = fields.category;
-  if (fields.quantityNeeded !== undefined)
-    updates.quantity_needed = fields.quantityNeeded;
   if (fields.sortOrder !== undefined) updates.sort_order = fields.sortOrder;
   if (fields.isActive !== undefined) updates.is_active = fields.isActive;
 
@@ -394,7 +391,6 @@ export async function fetchAllMembers(): Promise<
   const { data, error } = await supabase
     .from("members")
     .select("id, full_name, email")
-    .not("auth_user_id", "is", null)
     .order("full_name");
 
   if (error) return [];

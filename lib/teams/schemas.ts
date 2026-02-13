@@ -31,14 +31,12 @@ export const createPositionSchema = z.object({
   teamId: z.string().uuid(),
   name: z.string().min(1, "Position name is required").max(100),
   category: z.string().max(50).optional(),
-  quantityNeeded: z.number().int().min(1).max(20).default(1),
 });
 
 export const updatePositionSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, "Position name is required").max(100).optional(),
   category: z.string().max(50).optional(),
-  quantityNeeded: z.number().int().min(1).max(20).optional(),
   sortOrder: z.number().int().min(0).optional(),
   isActive: z.boolean().optional(),
 });
