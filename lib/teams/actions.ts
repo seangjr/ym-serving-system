@@ -85,10 +85,7 @@ export async function deleteTeam(
   }
 
   const admin = createAdminClient();
-  const { error } = await admin
-    .from("serving_teams")
-    .delete()
-    .eq("id", teamId);
+  const { error } = await admin.from("serving_teams").delete().eq("id", teamId);
 
   if (error) return { error: error.message };
 
@@ -383,4 +380,23 @@ export async function updateMemberPositionSkill(
   }
 
   return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// Fetch helpers (server actions callable from client components)
+// ---------------------------------------------------------------------------
+
+export async function fetchAllMembers(): Promise<
+  { id: string; full_name: string; email: string }[]
+> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("members")
+    .select("id, full_name, email")
+    .not("auth_user_id", "is", null)
+    .order("full_name");
+
+  if (error) return [];
+  return data ?? [];
 }

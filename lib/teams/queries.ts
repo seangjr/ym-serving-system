@@ -71,6 +71,40 @@ export interface TeamListItem {
   leadName: string | null;
 }
 
+export interface TeamDetailMember {
+  id: string;
+  member_id: string;
+  role: "lead" | "member";
+  joined_at: string;
+  full_name: string;
+  email: string;
+  avatar_url: string | null;
+  phone: string | null;
+  skills: {
+    position_id: string;
+    proficiency: string;
+    preference: string;
+  }[];
+}
+
+export interface TeamDetail {
+  id: string;
+  name: string;
+  description: string | null;
+  color: string | null;
+  is_active: boolean;
+  sort_order: number;
+  positions: {
+    id: string;
+    name: string;
+    category: string | null;
+    quantity_needed: number;
+    sort_order: number;
+    is_active: boolean;
+  }[];
+  members: TeamDetailMember[];
+}
+
 export interface MemberOption {
   id: string;
   full_name: string;
@@ -205,6 +239,117 @@ export async function getTeamWithMembers(
   }
 
   return data as unknown as TeamWithMembers;
+}
+
+/**
+ * Get a single team with positions, members (with profiles and skills).
+ * Used for the team detail page with full member information.
+ */
+export async function getTeamDetail(
+  teamId: string,
+): Promise<TeamDetail | null> {
+  const supabase = await createClient();
+
+  // Fetch team + positions + members with member profile data
+  const { data: team, error: teamError } = await supabase
+    .from("serving_teams")
+    .select(
+      `
+      id, name, description, color, is_active, sort_order,
+      team_positions(id, name, category, quantity_needed, sort_order, is_active),
+      team_members(
+        id, member_id, role, joined_at,
+        members(id, full_name, email),
+        member_profiles(avatar_url, phone)
+      )
+    `,
+    )
+    .eq("id", teamId)
+    .single();
+
+  if (teamError) {
+    if (teamError.code === "PGRST116") return null;
+    throw teamError;
+  }
+
+  // Get skill data for all members in this team
+  const memberIds = (team.team_members ?? []).map(
+    (m: { member_id: string }) => m.member_id,
+  );
+  const positionIds = (team.team_positions ?? []).map(
+    (p: { id: string }) => p.id,
+  );
+
+  let skillsMap: Record<
+    string,
+    { position_id: string; proficiency: string; preference: string }[]
+  > = {};
+
+  if (memberIds.length > 0 && positionIds.length > 0) {
+    const { data: skills } = await supabase
+      .from("member_position_skills")
+      .select("member_id, position_id, proficiency, preference")
+      .in("member_id", memberIds)
+      .in("position_id", positionIds);
+
+    if (skills) {
+      skillsMap = {};
+      for (const skill of skills) {
+        const mid = skill.member_id as string;
+        if (!skillsMap[mid]) skillsMap[mid] = [];
+        skillsMap[mid].push({
+          position_id: skill.position_id as string,
+          proficiency: skill.proficiency as string,
+          preference: skill.preference as string,
+        });
+      }
+    }
+  }
+
+  // Transform the nested Supabase response into our clean TeamDetail type
+  const members: TeamDetailMember[] = (team.team_members ?? []).map(
+    (tm: Record<string, unknown>) => {
+      const member = tm.members as {
+        id: string;
+        full_name: string;
+        email: string;
+      } | null;
+      const profile = tm.member_profiles as {
+        avatar_url: string | null;
+        phone: string | null;
+      } | null;
+      const memberId = tm.member_id as string;
+      return {
+        id: tm.id as string,
+        member_id: memberId,
+        role: tm.role as "lead" | "member",
+        joined_at: tm.joined_at as string,
+        full_name: member?.full_name ?? "Unknown",
+        email: member?.email ?? "",
+        avatar_url: profile?.avatar_url ?? null,
+        phone: profile?.phone ?? null,
+        skills: skillsMap[memberId] ?? [],
+      };
+    },
+  );
+
+  // Sort: leads first, then alphabetical by name
+  members.sort((a, b) => {
+    if (a.role === "lead" && b.role !== "lead") return -1;
+    if (a.role !== "lead" && b.role === "lead") return 1;
+    return a.full_name.localeCompare(b.full_name);
+  });
+
+  return {
+    id: team.id,
+    name: team.name,
+    description: team.description,
+    color: team.color,
+    is_active: team.is_active,
+    sort_order: team.sort_order,
+    positions: (team.team_positions ?? []) as TeamDetail["positions"],
+    members,
+  };
 }
 
 /**
