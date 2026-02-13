@@ -5,32 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Team leaders can schedule members to positions for upcoming services, and team members can see their assignments, confirm/decline, and manage their availability.
-**Current focus:** Phase 1 - Foundation & Authentication
+**Current focus:** Phase 2 - Teams & Member Profiles
 
 ## Current Position
 
-Phase: 1 of 10 (Foundation & Authentication)
-Plan: 5 of 5 in current phase
+Phase: 2 of 10 (Teams & Member Profiles)
+Plan: 1 of 4 in current phase
 Status: Executing
-Last activity: 2026-02-13 -- Completed 01-05 admin panel rework (DB-based roles/assignments)
+Last activity: 2026-02-13 -- Completed 02-01 schema & data layer (5 tables, 14 actions, 7 queries)
 
-Progress: [██████████] 10%
+Progress: [████████████] 12%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 4min
-- Total execution time: 0.33 hours
+- Total execution time: 0.42 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
+| 02-teams-and-member-profiles | 1/4 | 5min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-02 (4min), 01-03 (3min), 01-04 (5min), 01-05 (4min)
+- Last 5 plans: 01-02 (4min), 01-03 (3min), 01-04 (5min), 01-05 (4min), 02-01 (5min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -65,6 +66,11 @@ Recent decisions affecting current work:
 - [01-05-rework]: getUsers() joins members+assignments+roles, derives highestServingRole (admin/committee/member)
 - [01-05-rework]: updateUserRole() only manages Admin/Committee assignments, preserves other roles (Zone Leader, CG Leader)
 - [01-05-rework]: Mobile card + desktop table responsive layout for user role management
+- [02-01]: Zod v4 uses .issues not .errors on ZodError -- fixed across all action files
+- [02-01]: Position categories are free-form text with CHECK constraints, not Postgres enums (ministry-agnostic)
+- [02-01]: Team lead authorization checks team_members.role per-team, not global roles table
+- [02-01]: Profile upsert pattern handles 350+ existing members with no profile rows
+- [02-01]: Avatars bucket is public for simplified URL handling (no signed URLs)
 
 ### Pending Todos
 
@@ -78,5 +84,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 01-05 admin panel rework (DB-based role management)
+Stopped at: Completed 02-01 schema & data layer (teams, positions, membership, skills, profiles)
 Resume file: None
