@@ -12,25 +12,25 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 Phase: 1 of 10 (Foundation & Authentication)
 Plan: 3 of 5 in current phase
 Status: Executing
-Last activity: 2026-02-13 -- Completed 01-03 (Role management infrastructure)
+Last activity: 2026-02-13 -- Completed 01-02 (Auth flow UI) and 01-03 (Role management infrastructure)
 
 Progress: [██████░░░░] 6%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 3.5min
-- Total execution time: 0.12 hours
+- Total plans completed: 3
+- Average duration: 3.7min
+- Total execution time: 0.18 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-and-authentication | 2/5 | 7min | 3.5min |
+| 01-foundation-and-authentication | 3/5 | 11min | 3.7min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-03 (3min)
+- Last 5 plans: 01-01 (4min), 01-02 (4min), 01-03 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -48,6 +48,9 @@ Recent decisions affecting current work:
 - [01-01]: Used NEXT_PUBLIC_SUPABASE_ANON_KEY (not PUBLISHABLE_KEY) for env var naming -- wider compatibility
 - [01-01]: Added /update-password to middleware allow-list for password reset flow completeness
 - [01-01]: Error redirects go to /login?error=... rather than separate error pages
+- [01-02]: Used useActionState (React 19) for inline form error display instead of redirect-based error handling
+- [01-02]: useSearchParams extracted into Suspense-wrapped ErrorToast component for static prerendering compatibility
+- [01-02]: Sonner Toaster added to root layout for global toast notification support
 - [01-03]: Manual JWT decode (split+atob) instead of jwt-decode library -- JWT already verified by Supabase
 - [01-03]: Navigation items use string icon names for server-compatibility -- consuming component resolves icons
 - [01-03]: getUserRole() defaults to 'member' on any error -- safe default for authorization
@@ -64,5 +67,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 01-03-PLAN.md
+Stopped at: Completed 01-02-PLAN.md and 01-03-PLAN.md
 Resume file: None
