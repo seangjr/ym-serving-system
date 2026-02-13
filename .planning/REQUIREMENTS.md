@@ -182,13 +182,96 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| AUTH-04 | Phase 1 | Pending |
+| AUTH-05 | Phase 1 | Pending |
+| AUTH-06 | Phase 1 | Pending |
+| AUTH-07 | Phase 1 | Pending |
+| UX-01 | Phase 1 | Pending |
+| UX-02 | Phase 1 | Pending |
+| UX-03 | Phase 1 | Pending |
+| UX-04 | Phase 1 | Pending |
+| TEAM-01 | Phase 2 | Pending |
+| TEAM-02 | Phase 2 | Pending |
+| TEAM-03 | Phase 2 | Pending |
+| TEAM-04 | Phase 2 | Pending |
+| TEAM-05 | Phase 2 | Pending |
+| TEAM-06 | Phase 2 | Pending |
+| PROF-01 | Phase 2 | Pending |
+| PROF-02 | Phase 2 | Pending |
+| PROF-03 | Phase 2 | Pending |
+| PROF-04 | Phase 2 | Pending |
+| PROF-05 | Phase 2 | Pending |
+| PROF-06 | Phase 2 | Pending |
+| PROF-07 | Phase 2 | Pending |
+| SERV-01 | Phase 3 | Pending |
+| SERV-02 | Phase 3 | Pending |
+| SERV-03 | Phase 3 | Pending |
+| SERV-04 | Phase 3 | Pending |
+| SERV-05 | Phase 3 | Pending |
+| SERV-06 | Phase 3 | Pending |
+| SERV-07 | Phase 3 | Pending |
+| SERV-08 | Phase 3 | Pending |
+| SERV-09 | Phase 3 | Pending |
+| ASGN-01 | Phase 4 | Pending |
+| ASGN-02 | Phase 4 | Pending |
+| ASGN-03 | Phase 4 | Pending |
+| ASGN-04 | Phase 4 | Pending |
+| ASGN-05 | Phase 4 | Pending |
+| ASGN-06 | Phase 4 | Pending |
+| ASGN-07 | Phase 4 | Pending |
+| ASGN-08 | Phase 4 | Pending |
+| ASGN-09 | Phase 4 | Pending |
+| ASGN-10 | Phase 4 | Pending |
+| AVAIL-01 | Phase 5 | Pending |
+| AVAIL-02 | Phase 5 | Pending |
+| AVAIL-03 | Phase 5 | Pending |
+| AVAIL-04 | Phase 5 | Pending |
+| RESP-01 | Phase 6 | Pending |
+| RESP-02 | Phase 6 | Pending |
+| RESP-03 | Phase 6 | Pending |
+| RESP-04 | Phase 6 | Pending |
+| RESP-05 | Phase 6 | Pending |
+| NOTF-01 | Phase 6 | Pending |
+| NOTF-02 | Phase 6 | Pending |
+| NOTF-03 | Phase 6 | Pending |
+| NOTF-04 | Phase 6 | Pending |
+| NOTF-05 | Phase 6 | Pending |
+| SONG-01 | Phase 7 | Pending |
+| SONG-02 | Phase 7 | Pending |
+| SONG-03 | Phase 7 | Pending |
+| SONG-04 | Phase 7 | Pending |
+| SONG-05 | Phase 7 | Pending |
+| SONG-06 | Phase 7 | Pending |
+| SONG-07 | Phase 7 | Pending |
+| ANN-01 | Phase 8 | Pending |
+| ANN-02 | Phase 8 | Pending |
+| ANN-03 | Phase 8 | Pending |
+| ANN-04 | Phase 8 | Pending |
+| UX-09 | Phase 8 | Pending |
+| EQUIP-01 | Phase 9 | Pending |
+| EQUIP-02 | Phase 9 | Pending |
+| EQUIP-03 | Phase 9 | Pending |
+| EQUIP-04 | Phase 9 | Pending |
+| FILE-01 | Phase 9 | Pending |
+| FILE-02 | Phase 9 | Pending |
+| FILE-03 | Phase 9 | Pending |
+| FILE-04 | Phase 9 | Pending |
+| REPT-01 | Phase 10 | Pending |
+| REPT-02 | Phase 10 | Pending |
+| REPT-03 | Phase 10 | Pending |
+| UX-05 | Phase 10 | Pending |
+| UX-06 | Phase 10 | Pending |
+| UX-07 | Phase 10 | Pending |
+| UX-08 | Phase 10 | Pending |
 
 **Coverage:**
-- v1 requirements: 67 total
-- Mapped to phases: 0
-- Unmapped: 67 ⚠️
+- v1 requirements: 84 total
+- Mapped to phases: 84
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 after initial definition*
+*Last updated: 2026-02-13 after roadmap creation*
