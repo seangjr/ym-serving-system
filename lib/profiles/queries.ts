@@ -196,6 +196,55 @@ export async function getMemberProfile(
 }
 
 /**
+ * Get the current user's position skills grouped by team.
+ * For the profile page Positions & Skills tab.
+ */
+export interface OwnPositionSkill {
+  proficiency: string;
+  preference: string;
+  team_positions: {
+    id: string;
+    name: string;
+    category: string | null;
+    serving_teams: {
+      id: string;
+      name: string;
+      color: string | null;
+    };
+  };
+}
+
+export async function getOwnPositionSkills(): Promise<OwnPositionSkill[]> {
+  const supabase = await createClient();
+  const { memberId } = await getUserRole(supabase);
+
+  if (!memberId) return [];
+
+  const { data, error } = await supabase
+    .from("member_position_skills")
+    .select(
+      `
+      proficiency,
+      preference,
+      team_positions(
+        id,
+        name,
+        category,
+        serving_teams(
+          id,
+          name,
+          color
+        )
+      )
+    `,
+    )
+    .eq("member_id", memberId);
+
+  if (error) throw error;
+  return (data ?? []) as unknown as OwnPositionSkill[];
+}
+
+/**
  * Get all members of a specific team with their profiles and skills.
  * For team detail views.
  */

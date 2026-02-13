@@ -6,13 +6,16 @@ import { ProfileForm } from "@/components/profiles/profile-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getUserRole } from "@/lib/auth/roles";
-import { getOwnProfile } from "@/lib/profiles/queries";
+import { getOwnPositionSkills, getOwnProfile } from "@/lib/profiles/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
   const { memberId } = await getUserRole(supabase);
-  const profile = await getOwnProfile();
+  const [profile, positionSkills] = await Promise.all([
+    getOwnProfile(),
+    getOwnPositionSkills(),
+  ]);
 
   if (!profile || !memberId) {
     return (
@@ -78,7 +81,7 @@ export default async function ProfilePage() {
         </TabsContent>
 
         <TabsContent value="positions" className="mt-6">
-          <PositionPreferences memberId={memberId} />
+          <PositionPreferences positions={positionSkills} />
         </TabsContent>
 
         <TabsContent value="about" className="mt-6">
