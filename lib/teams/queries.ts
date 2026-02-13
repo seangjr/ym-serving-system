@@ -132,7 +132,6 @@ export async function getTeamsWithLeads(): Promise<TeamListItem[]> {
 
   if (error) throw error;
 
-  // biome-ignore lint: Supabase returns nested relations with dynamic types
   return (data ?? []).map((team: Record<string, unknown>) => {
     const teamMembers = (team.team_members ?? []) as {
       role: string;
