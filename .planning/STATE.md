@@ -9,29 +9,29 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 2 of 10 (Teams & Member Profiles) -- Gap Closure
-Plan: 6 of 7 completed in current phase (4 original + 3 gap closure)
-Status: Executing Gap Closure Plans
-Last activity: 2026-02-13 -- Completed 02-05 sidebar nav fix (Teams link + profile to dropdown)
+Phase: 2 of 10 (Teams & Member Profiles) -- COMPLETE
+Plan: 7 of 7 completed in current phase (4 original + 3 gap closure)
+Status: Phase Complete
+Last activity: 2026-02-13 -- Completed 02-06 teams UX gap closure (responsive roster table, Assign Positions dialog, remove quantity field)
 
 Progress: [██████████████] 14%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 12
 - Average duration: 5min
-- Total execution time: 0.79 hours
+- Total execution time: 0.86 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
-| 02-teams-and-member-profiles | 6/7 | 27min | 5min |
+| 02-teams-and-member-profiles | 7/7 | 31min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (10min), 02-03 (7min), 02-04 (4min), 02-07 (3min), 02-05 (3min)
+- Last 5 plans: 02-03 (7min), 02-04 (4min), 02-07 (3min), 02-05 (3min), 02-06 (4min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -88,6 +88,8 @@ Recent decisions affecting current work:
 - [02-07]: Personal info fields (phone, emergency contact, birthdate) read/written from shared members table, not member_profiles
 - [02-07]: member_profiles retains only serving-specific fields: avatar_url, joined_serving_at, notification prefs
 - [02-07]: SelectContent position="popper" with max-h-48 for fixed dropdown height
+- [02-06]: Desktop roster table uses Link-wrapped rows for navigation (server component compatible)
+- [02-06]: quantityNeeded removed entirely from position schemas -- DB column default of 1 handles it
 
 ### Pending Todos
 
@@ -101,5 +103,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 02-05 sidebar nav fix -- Teams link added, My Profile moved to dropdown
+Stopped at: Completed 02-06 teams UX gap closure -- Phase 2 COMPLETE (all 7 plans done, including 3 gap closure)
 Resume file: None
