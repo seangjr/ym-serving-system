@@ -24,7 +24,7 @@ export async function updateOwnProfile(
   const parsed = updateProfileSchema.safeParse(data);
   if (!parsed.success) {
     return {
-      error: parsed.error.errors[0]?.message ?? "Invalid profile data.",
+      error: parsed.error.issues[0]?.message ?? "Invalid profile data.",
     };
   }
 
@@ -64,7 +64,7 @@ export async function updateNotificationPreferences(
   if (!parsed.success) {
     return {
       error:
-        parsed.error.errors[0]?.message ?? "Invalid notification preferences.",
+        parsed.error.issues[0]?.message ?? "Invalid notification preferences.",
     };
   }
 
@@ -132,7 +132,7 @@ export async function adminUpdateMemberProfile(
   const parsed = updateProfileSchema.safeParse(data);
   if (!parsed.success) {
     return {
-      error: parsed.error.errors[0]?.message ?? "Invalid profile data.",
+      error: parsed.error.issues[0]?.message ?? "Invalid profile data.",
     };
   }
 

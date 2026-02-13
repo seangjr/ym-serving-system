@@ -27,7 +27,7 @@ export async function createTeam(
 
   const parsed = createTeamSchema.safeParse(data);
   if (!parsed.success) {
-    return { error: parsed.error.errors[0]?.message ?? "Invalid team data." };
+    return { error: parsed.error.issues[0]?.message ?? "Invalid team data." };
   }
 
   const admin = createAdminClient();
@@ -58,7 +58,7 @@ export async function updateTeam(
 
   const parsed = updateTeamSchema.safeParse(data);
   if (!parsed.success) {
-    return { error: parsed.error.errors[0]?.message ?? "Invalid team data." };
+    return { error: parsed.error.issues[0]?.message ?? "Invalid team data." };
   }
 
   const { id, ...updates } = parsed.data;
@@ -112,7 +112,7 @@ export async function createPosition(
   const parsed = createPositionSchema.safeParse(data);
   if (!parsed.success) {
     return {
-      error: parsed.error.errors[0]?.message ?? "Invalid position data.",
+      error: parsed.error.issues[0]?.message ?? "Invalid position data.",
     };
   }
 
@@ -146,7 +146,7 @@ export async function updatePosition(
   const parsed = updatePositionSchema.safeParse(data);
   if (!parsed.success) {
     return {
-      error: parsed.error.errors[0]?.message ?? "Invalid position data.",
+      error: parsed.error.issues[0]?.message ?? "Invalid position data.",
     };
   }
 
