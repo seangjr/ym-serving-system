@@ -31,7 +31,7 @@ Progress: [████████████] 12%
 | 02-teams-and-member-profiles | 3/4 | 17min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 01-04 (5min), 01-05 (4min), 02-01 (5min), 02-02 (5min), 02-03 (7min)
+- Last 5 plans: 01-04 (5min), 01-05 (4min), 02-01 (5min), 02-02 (10min), 02-03 (7min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -71,6 +71,11 @@ Recent decisions affecting current work:
 - [02-01]: Team lead authorization checks team_members.role per-team, not global roles table
 - [02-01]: Profile upsert pattern handles 350+ existing members with no profile rows
 - [02-01]: Avatars bucket is public for simplified URL handling (no signed URLs)
+- [02-02]: Added getTeamsWithLeads query to fetch lead names with team listing (single query, not N+1)
+- [02-02]: Created fetchAllMembers server action to avoid server-only import in client MemberAssignment component
+- [02-02]: getTeamDetail returns flattened TeamDetailMember type combining members, profiles, and skills
+- [02-02]: PositionManager uses inline forms for add/edit instead of dialogs (faster workflow)
+- [02-02]: Skill edit dialog saves sequentially for error isolation
 - [02-03]: Position skills fetched via dedicated getOwnPositionSkills query (lightweight profile query)
 - [02-03]: Position preferences read-only -- skill levels managed by team leads per TEAM-06
 - [02-03]: Added created_at to OwnProfile for join date fallback when joined_serving_at is null
