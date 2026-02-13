@@ -1,14 +1,14 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { validatePassword } from "@/lib/otp/password-validation";
 import { PASSWORD_MIN_LENGTH } from "@/lib/otp/constants";
+import { validatePassword } from "@/lib/otp/password-validation";
 
 function CheckIcon({ checked }: { checked: boolean }) {
   return (
