@@ -76,10 +76,12 @@ export async function POST(request: Request) {
     }
 
     // Update auth user password
-    const { error: updateAuthError } =
-      await admin.auth.admin.updateUserById(resetRecord.auth_user_id, {
+    const { error: updateAuthError } = await admin.auth.admin.updateUserById(
+      resetRecord.auth_user_id,
+      {
         password,
-      });
+      },
+    );
 
     if (updateAuthError) {
       console.error("[reset-password] updateUser error:", updateAuthError);

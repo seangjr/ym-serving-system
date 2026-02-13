@@ -195,7 +195,9 @@ function VerifyForm() {
           </span>
         </div>
 
-        {error && <p className="text-destructive text-center text-sm">{error}</p>}
+        {error && (
+          <p className="text-destructive text-center text-sm">{error}</p>
+        )}
 
         <Button
           type="submit"

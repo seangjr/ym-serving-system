@@ -44,9 +44,7 @@ export async function POST(request: Request) {
       data: { users },
     } = await admin.auth.admin.listUsers({ perPage: 1000 });
 
-    const authUser = users.find(
-      (u) => u.email?.toLowerCase() === email,
-    );
+    const authUser = users.find((u) => u.email?.toLowerCase() === email);
 
     if (!authUser) {
       // User doesn't exist — return generic success (prevent enumeration)
@@ -146,8 +144,7 @@ export async function POST(request: Request) {
 
     // Send email
     const userName =
-      authUser.user_metadata?.full_name ??
-      authUser.user_metadata?.name;
+      authUser.user_metadata?.full_name ?? authUser.user_metadata?.name;
 
     await sendPasswordResetEmail(email, code, userName);
 

@@ -19,9 +19,7 @@ export async function GET(request: NextRequest) {
 
     const { data: resetRecord } = await admin
       .from("password_resets")
-      .select(
-        "attempts_left, resend_available_at, otp_expires_at",
-      )
+      .select("attempts_left, resend_available_at, otp_expires_at")
       .eq("email", email)
       .eq("status", "pending")
       .order("created_at", { ascending: false })
