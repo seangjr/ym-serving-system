@@ -143,7 +143,7 @@ export function NotificationPreferences({
                         <SelectValue placeholder="Select reminder timing" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper" className="max-h-48">
                       <SelectItem value="0">No reminder</SelectItem>
                       {Array.from({ length: 14 }, (_, i) => i + 1).map(
                         (days) => (
