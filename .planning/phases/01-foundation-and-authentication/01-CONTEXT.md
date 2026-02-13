@@ -29,6 +29,13 @@ Supabase auth setup, role-based access with RLS policies, and the app shell (sid
   - Quick role change dropdown on a member's profile page
   - Dedicated admin panel listing all users with bulk role management
 
+### Mobile-First Design Philosophy
+- **Mobile is the primary view** — most users will interact via phone
+- Two distinct design targets: mobile view (designed first) and desktop view (enhanced second)
+- Not just "responsive" — mobile layouts are intentionally designed, not shrunk-down desktop
+- Touch targets, swipe gestures, and thumb-zone placement considered for all interactive elements
+- Desktop view adds sidebar and multi-column layouts as progressive enhancement
+
 ### App Shell & Navigation
 - Fixed sidebar on desktop, slide-over overlay on mobile with hamburger menu (matching Figma prototype)
 - Role-filtered sidebar:
@@ -55,10 +62,10 @@ Supabase auth setup, role-based access with RLS policies, and the app shell (sid
 - Overall feel: Square/Cash App meets church scheduling — professional, not playful
 
 ### Claude's Discretion
-- Login page layout and visual design (within Dorsey aesthetic)
+- Login page layout and visual design (within Dorsey aesthetic, mobile-first)
 - Password reset flow implementation details
 - RLS policy structure and naming
-- Mobile breakpoints and responsive behavior specifics
+- Mobile breakpoints and touch interaction specifics
 - Loading states and skeleton design
 - Error page design (404, 500, unauthorized)
 
