@@ -1,10 +1,11 @@
-import Link from "next/link";
 import { Crown, Users } from "lucide-react";
+import Link from "next/link";
 import { Suspense } from "react";
 import { RosterMemberCard } from "@/components/teams/roster-member-card";
 import { RosterSearch } from "@/components/teams/roster-search";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -28,15 +29,6 @@ function getInitials(name: string): string {
     .toUpperCase()
     .slice(0, 2);
 }
-
-const PROFICIENCY_COLORS: Record<string, string> = {
-  beginner: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-  intermediate:
-    "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
-  advanced:
-    "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
-  expert: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
-};
 
 // ---------------------------------------------------------------------------
 // Page
@@ -108,22 +100,24 @@ export default async function TeamRosterPage({
         <>
           {/* Desktop: table layout */}
           <div className="hidden md:block">
-            <div className="rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Member</TableHead>
-                    <TableHead>Teams</TableHead>
-                    <TableHead>Positions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {members.map((member) => (
-                    <RosterTableRow key={member.id} member={member} />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[280px]">Member</TableHead>
+                      <TableHead>Teams</TableHead>
+                      <TableHead>Positions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {members.map((member) => (
+                      <RosterTableRow key={member.id} member={member} />
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Mobile: card grid */}
@@ -173,9 +167,7 @@ function RosterTableRow({ member }: { member: RosterMember }) {
               <p className="text-sm font-medium truncate group-hover:underline">
                 {member.full_name}
               </p>
-              {isLead && (
-                <Crown className="size-3.5 shrink-0 text-amber-500" />
-              )}
+              {isLead && <Crown className="size-3.5 shrink-0 text-amber-500" />}
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {member.email}
@@ -208,24 +200,16 @@ function RosterTableRow({ member }: { member: RosterMember }) {
           <span className="text-xs text-muted-foreground">--</span>
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="whitespace-normal">
         {member.positions.length > 0 ? (
           <div className="flex flex-wrap gap-1">
             {member.positions.map((pos) => (
               <Badge
                 key={`${pos.name}-${pos.proficiency}`}
-                variant="outline"
-                className={`text-xs ${PROFICIENCY_COLORS[pos.proficiency] ?? ""}`}
+                variant="secondary"
+                className="text-xs"
               >
                 {pos.name}
-                {pos.proficiency && pos.proficiency !== "beginner" && (
-                  <span className="ml-1 opacity-75">
-                    (
-                    {pos.proficiency.charAt(0).toUpperCase() +
-                      pos.proficiency.slice(1)}
-                    )
-                  </span>
-                )}
               </Badge>
             ))}
           </div>

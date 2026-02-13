@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { getUserRole, isAdmin, isAdminOrCommittee } from "@/lib/auth/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import type { Preference, Proficiency } from "./schemas";
 import {
   createPositionSchema,
   createTeamSchema,
@@ -315,14 +314,13 @@ export async function updateMemberTeamRole(
 }
 
 // ---------------------------------------------------------------------------
-// Member position skills
+// Member position assignments (checkbox-based)
 // ---------------------------------------------------------------------------
 
-export async function updateMemberPositionSkill(
+export async function updateMemberPositions(
+  teamId: string,
   memberId: string,
-  positionId: string,
-  proficiency: Proficiency,
-  preference: Preference,
+  positionIds: string[],
 ): Promise<{ success: true } | { error: string }> {
   const supabase = await createClient();
   const { role: userRole, memberId: callerMemberId } =
@@ -331,19 +329,10 @@ export async function updateMemberPositionSkill(
   // Admin/committee can update any; team lead can update for their team
   if (!isAdminOrCommittee(userRole)) {
     const admin = createAdminClient();
-    // Find which team this position belongs to
-    const { data: pos } = await admin
-      .from("team_positions")
-      .select("team_id")
-      .eq("id", positionId)
-      .single();
-
-    if (!pos) return { error: "Position not found" };
-
     const { data: callerMembership } = await admin
       .from("team_members")
       .select("role")
-      .eq("team_id", pos.team_id)
+      .eq("team_id", teamId)
       .eq("member_id", callerMemberId)
       .single();
 
@@ -353,29 +342,45 @@ export async function updateMemberPositionSkill(
   }
 
   const admin = createAdminClient();
-  const { error } = await admin.from("member_position_skills").upsert(
-    {
-      member_id: memberId,
-      position_id: positionId,
-      proficiency,
-      preference,
-    },
-    { onConflict: "member_id,position_id" },
+
+  // Get all position IDs for this team (to scope the delete)
+  const { data: teamPositions } = await admin
+    .from("team_positions")
+    .select("id")
+    .eq("team_id", teamId);
+
+  const teamPositionIds = (teamPositions ?? []).map(
+    (p: { id: string }) => p.id,
   );
 
-  if (error) return { error: error.message };
+  if (teamPositionIds.length > 0) {
+    // Delete existing skills for this member in this team's positions
+    const { error: deleteError } = await admin
+      .from("member_position_skills")
+      .delete()
+      .eq("member_id", memberId)
+      .in("position_id", teamPositionIds);
 
-  // Find position's team for revalidation
-  const { data: pos } = await admin
-    .from("team_positions")
-    .select("team_id")
-    .eq("id", positionId)
-    .single();
-
-  if (pos?.team_id) {
-    revalidatePath(`/teams/${pos.team_id}`);
+    if (deleteError) return { error: deleteError.message };
   }
 
+  // Insert new rows for checked positions
+  if (positionIds.length > 0) {
+    const rows = positionIds.map((positionId) => ({
+      member_id: memberId,
+      position_id: positionId,
+      proficiency: "beginner",
+      preference: "willing",
+    }));
+
+    const { error: insertError } = await admin
+      .from("member_position_skills")
+      .insert(rows);
+
+    if (insertError) return { error: insertError.message };
+  }
+
+  revalidatePath(`/teams/${teamId}`);
   return { success: true };
 }
 

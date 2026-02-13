@@ -16,6 +16,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -31,14 +32,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -50,11 +43,9 @@ import {
 import type { AppRole } from "@/lib/auth/roles";
 import {
   removeMemberFromTeam,
-  updateMemberPositionSkill,
+  updateMemberPositions,
   updateMemberTeamRole,
 } from "@/lib/teams/actions";
-import type { Preference, Proficiency } from "@/lib/teams/schemas";
-import { preferenceLevels, proficiencyLevels } from "@/lib/teams/schemas";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -68,7 +59,7 @@ interface MemberData {
   full_name: string;
   email: string;
   avatar_url: string | null;
-  phone: string | null;
+  contact_number: string | null;
   skills: {
     position_id: string;
     proficiency: string;
@@ -79,6 +70,7 @@ interface MemberData {
 interface PositionData {
   id: string;
   name: string;
+  category: string | null;
 }
 
 interface TeamMemberListProps {
@@ -88,20 +80,6 @@ interface TeamMemberListProps {
   userRole: AppRole;
   callerMemberId: string | null;
 }
-
-// ---------------------------------------------------------------------------
-// Proficiency badge styles
-// ---------------------------------------------------------------------------
-
-const PROFICIENCY_COLORS: Record<string, string> = {
-  beginner: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-  intermediate:
-    "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-  advanced:
-    "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
-  expert:
-    "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
-};
 
 function getInitials(name: string): string {
   return name
@@ -345,8 +323,8 @@ function SkillBadges({
         return (
           <Badge
             key={skill.position_id}
-            variant="outline"
-            className={`text-xs ${PROFICIENCY_COLORS[skill.proficiency] ?? ""}`}
+            variant="secondary"
+            className="text-xs"
           >
             {pos.name}
           </Badge>
@@ -462,6 +440,7 @@ function MemberActions({
       <SkillEditDialog
         open={showSkillDialog}
         onOpenChange={setShowSkillDialog}
+        teamId={teamId}
         member={member}
         positions={positions}
       />
@@ -476,82 +455,56 @@ function MemberActions({
 function SkillEditDialog({
   open,
   onOpenChange,
+  teamId,
   member,
   positions,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  teamId: string;
   member: MemberData;
   positions: PositionData[];
 }) {
   const [isPending, startTransition] = useTransition();
-  const [localSkills, setLocalSkills] = useState<
-    Record<string, { proficiency: Proficiency; preference: Preference }>
-  >(() => {
-    const map: Record<
-      string,
-      { proficiency: Proficiency; preference: Preference }
-    > = {};
-    for (const s of member.skills) {
-      map[s.position_id] = {
-        proficiency: s.proficiency as Proficiency,
-        preference: s.preference as Preference,
-      };
-    }
-    return map;
+  const [checked, setChecked] = useState<Set<string>>(() => {
+    return new Set(member.skills.map((s) => s.position_id));
   });
+
+  function toggle(positionId: string) {
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (next.has(positionId)) {
+        next.delete(positionId);
+      } else {
+        next.add(positionId);
+      }
+      return next;
+    });
+  }
 
   function handleSave() {
     startTransition(async () => {
-      const entries = Object.entries(localSkills);
-      let hasError = false;
-
-      for (const [positionId, skill] of entries) {
-        const result = await updateMemberPositionSkill(
-          member.member_id,
-          positionId,
-          skill.proficiency,
-          skill.preference,
-        );
-        if ("error" in result) {
-          toast.error(result.error);
-          hasError = true;
-          break;
-        }
-      }
-
-      if (!hasError) {
-        toast.success("Skills updated");
+      const result = await updateMemberPositions(
+        teamId,
+        member.member_id,
+        Array.from(checked),
+      );
+      if ("error" in result) {
+        toast.error(result.error);
+      } else {
+        toast.success("Positions updated");
         onOpenChange(false);
       }
     });
   }
 
-  function updateSkill(
-    positionId: string,
-    field: "proficiency" | "preference",
-    value: string,
-  ) {
-    setLocalSkills((prev) => ({
-      ...prev,
-      [positionId]: {
-        proficiency:
-          prev[positionId]?.proficiency ?? ("beginner" as Proficiency),
-        preference: prev[positionId]?.preference ?? ("willing" as Preference),
-        [field]: value,
-      },
-    }));
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Assign Positions — {member.full_name}</DialogTitle>
           <DialogDescription>
-            For each position in this team, set how experienced this member is
-            (proficiency) and how much they want to serve in this role
-            (preference).
+            Select the positions this member serves in.
           </DialogDescription>
         </DialogHeader>
 
@@ -560,67 +513,26 @@ function SkillEditDialog({
             No positions defined. Add positions first.
           </p>
         ) : (
-          <div className="flex flex-col gap-4 max-h-80 overflow-y-auto">
-            {positions.map((pos) => {
-              const skill = localSkills[pos.id];
-              return (
-                <div key={pos.id} className="flex flex-col gap-2">
-                  <Label className="text-sm font-medium">{pos.name}</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        Experience Level
-                      </span>
-                      <Select
-                        value={skill?.proficiency ?? "beginner"}
-                        onValueChange={(v) =>
-                          updateSkill(pos.id, "proficiency", v)
-                        }
-                      >
-                        <SelectTrigger size="sm">
-                          <SelectValue placeholder="Proficiency" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {proficiencyLevels.map((level) => (
-                            <SelectItem key={level} value={level}>
-                              {level.charAt(0).toUpperCase() + level.slice(1)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        How skilled is this member at this position?
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        Willingness
-                      </span>
-                      <Select
-                        value={skill?.preference ?? "willing"}
-                        onValueChange={(v) =>
-                          updateSkill(pos.id, "preference", v)
-                        }
-                      >
-                        <SelectTrigger size="sm">
-                          <SelectValue placeholder="Preference" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {preferenceLevels.map((level) => (
-                            <SelectItem key={level} value={level}>
-                              {level.charAt(0).toUpperCase() + level.slice(1)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        How much does this member want to serve here?
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="flex flex-col gap-2 max-h-80 overflow-y-auto py-1">
+            {positions.map((pos) => (
+              <label
+                key={pos.id}
+                htmlFor={`pos-${pos.id}`}
+                className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-accent cursor-pointer"
+              >
+                <Checkbox
+                  id={`pos-${pos.id}`}
+                  checked={checked.has(pos.id)}
+                  onCheckedChange={() => toggle(pos.id)}
+                />
+                <span className="text-sm font-medium">{pos.name}</span>
+                {pos.category && (
+                  <Badge variant="outline" className="text-xs ml-auto">
+                    {pos.category}
+                  </Badge>
+                )}
+              </label>
+            ))}
           </div>
         )}
 

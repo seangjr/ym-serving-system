@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import { redirect } from "next/navigation";
-import { TeamCard } from "@/components/teams/team-card";
 import { TeamFormDialog } from "@/components/teams/team-form-dialog";
+import { TeamsTable } from "@/components/teams/teams-table";
 import { Button } from "@/components/ui/button";
 import { getUserRole, isAdminOrCommittee } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
@@ -39,11 +39,7 @@ export default async function TeamsPage() {
       </div>
 
       {teams.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {teams.map((team) => (
-            <TeamCard key={team.id} team={team} userRole={role} />
-          ))}
-        </div>
+        <TeamsTable teams={teams} userRole={role} />
       ) : (
         <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed p-12">
           <div className="text-center">

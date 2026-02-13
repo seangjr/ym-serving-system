@@ -8,21 +8,6 @@ interface PositionPreferencesProps {
   positions: OwnPositionSkill[];
 }
 
-const PROFICIENCY_STYLES: Record<string, string> = {
-  beginner: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-  intermediate: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
-  advanced:
-    "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
-  expert: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
-};
-
-const PREFERENCE_STYLES: Record<string, string> = {
-  primary: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
-  secondary:
-    "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-  willing: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-};
-
 export function PositionPreferences({ positions }: PositionPreferencesProps) {
   if (!positions || positions.length === 0) {
     return (
@@ -83,37 +68,15 @@ export function PositionPreferences({ positions }: PositionPreferencesProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="flex flex-wrap gap-1.5">
               {skills.map((skill) => (
-                <div
+                <Badge
                   key={`${team.id}-${skill.positionName}`}
-                  className="flex flex-wrap items-center gap-2"
+                  variant="secondary"
+                  className="text-xs"
                 >
-                  <span className="text-sm font-medium">
-                    {skill.positionName}
-                  </span>
-                  {skill.category && (
-                    <Badge variant="outline" className="text-xs">
-                      {skill.category}
-                    </Badge>
-                  )}
-                  <Badge
-                    className={
-                      PROFICIENCY_STYLES[skill.proficiency] ??
-                      PROFICIENCY_STYLES.beginner
-                    }
-                  >
-                    {skill.proficiency}
-                  </Badge>
-                  <Badge
-                    className={
-                      PREFERENCE_STYLES[skill.preference] ??
-                      PREFERENCE_STYLES.willing
-                    }
-                  >
-                    {skill.preference}
-                  </Badge>
-                </div>
+                  {skill.positionName}
+                </Badge>
               ))}
             </div>
           </CardContent>

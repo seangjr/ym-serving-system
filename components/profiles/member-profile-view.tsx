@@ -5,25 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { MemberProfile } from "@/lib/profiles/queries";
 
-// ---------------------------------------------------------------------------
-// Badge color maps (consistent with position-preferences and team-member-list)
-// ---------------------------------------------------------------------------
-
-const PROFICIENCY_STYLES: Record<string, string> = {
-  beginner: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-  intermediate: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
-  advanced:
-    "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
-  expert: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
-};
-
-const PREFERENCE_STYLES: Record<string, string> = {
-  primary: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
-  secondary:
-    "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-  willing: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-};
-
 function getInitials(name: string): string {
   return name
     .split(" ")
@@ -74,13 +55,13 @@ export function MemberProfileView({ member }: MemberProfileViewProps) {
                 <Mail className="size-4" />
                 {member.email}
               </a>
-              {member.phone ? (
+              {member.contact_number ? (
                 <a
-                  href={`tel:${member.phone}`}
+                  href={`tel:${member.contact_number}`}
                   className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <PhoneIcon className="size-4" />
-                  {member.phone}
+                  {member.contact_number}
                 </a>
               ) : (
                 <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -170,41 +151,18 @@ function SkillsByTeam({
 }: {
   skills: MemberProfile["member_position_skills"];
 }) {
-  // Group skills -- we don't have team info directly on skills,
-  // so we display them as a flat list with position details
   return (
-    <div className="space-y-3">
+    <div className="flex flex-wrap gap-1.5">
       {skills.map((skill) => {
         const pos = skill.team_positions;
         return (
-          <div
+          <Badge
             key={`${pos?.id ?? pos?.name}-${skill.proficiency}`}
-            className="flex flex-wrap items-center gap-2"
+            variant="secondary"
+            className="text-xs"
           >
-            <span className="text-sm font-medium">
-              {pos?.name ?? "Unknown"}
-            </span>
-            {pos?.category && (
-              <Badge variant="outline" className="text-xs">
-                {pos.category}
-              </Badge>
-            )}
-            <Badge
-              className={
-                PROFICIENCY_STYLES[skill.proficiency] ??
-                PROFICIENCY_STYLES.beginner
-              }
-            >
-              {skill.proficiency}
-            </Badge>
-            <Badge
-              className={
-                PREFERENCE_STYLES[skill.preference] ?? PREFERENCE_STYLES.willing
-              }
-            >
-              {skill.preference}
-            </Badge>
-          </div>
+            {pos?.name ?? "Unknown"}
+          </Badge>
         );
       })}
     </div>
