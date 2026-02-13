@@ -101,7 +101,7 @@ export default function LoginPage() {
       {/* Footer link */}
       <div className="text-center">
         <Link
-          href="/reset-password"
+          href="/forgot-password"
           className="text-muted-foreground hover:text-foreground text-sm transition-colors"
         >
           Forgot your password?
