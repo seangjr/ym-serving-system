@@ -9,29 +9,29 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 2 of 10 (Teams & Member Profiles)
-Plan: 3 of 4 in current phase
-Status: Executing
-Last activity: 2026-02-13 -- Completed 02-03 member profile page (tabbed layout, avatar upload, notification prefs)
+Phase: 2 of 10 (Teams & Member Profiles) -- COMPLETE
+Plan: 4 of 4 in current phase
+Status: Phase Complete
+Last activity: 2026-02-13 -- Completed 02-04 team roster page and member profile view
 
-Progress: [████████████] 12%
+Progress: [██████████████] 14%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 5min
-- Total execution time: 0.62 hours
+- Total execution time: 0.69 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
-| 02-teams-and-member-profiles | 3/4 | 17min | 6min |
+| 02-teams-and-member-profiles | 4/4 | 21min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-04 (5min), 01-05 (4min), 02-01 (5min), 02-02 (10min), 02-03 (7min)
+- Last 5 plans: 01-05 (4min), 02-01 (5min), 02-02 (10min), 02-03 (7min), 02-04 (4min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -79,6 +79,10 @@ Recent decisions affecting current work:
 - [02-03]: Position skills fetched via dedicated getOwnPositionSkills query (lightweight profile query)
 - [02-03]: Position preferences read-only -- skill levels managed by team leads per TEAM-06
 - [02-03]: Added created_at to OwnProfile for join date fallback when joined_serving_at is null
+- [02-04]: getTeamRoster uses !inner join on team_members to return only serving members (not all 350+)
+- [02-04]: Search uses URL params (?q=, ?team=) for shareable/bookmarkable results
+- [02-04]: All authenticated users can view all profile fields -- noted for future privacy restriction
+- [02-04]: Team filter chips are server-rendered anchor tags for zero JS overhead
 
 ### Pending Todos
 
@@ -92,5 +96,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 02-03 member profile page (tabbed layout, avatar upload, notification prefs, position display)
+Stopped at: Completed 02-04 team roster & member profile view -- Phase 2 COMPLETE (all 4 plans done)
 Resume file: None
