@@ -54,13 +54,13 @@ Plans:
   3. Team roster page shows all members with searchable list, and each member displays their positions with skill proficiency levels
   4. Member can view and edit their own profile (name, email, phone, avatar, emergency contact, birthdate, notification preferences, position preferences)
   5. User can view other team members' profiles with name, positions, and contact info
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: Teams and positions database schema, RLS policies, and CRUD operations
-- [ ] 02-02: Team management UI (create/edit teams, manage positions, assign leads)
-- [ ] 02-03: Member profiles database schema and profile management UI
-- [ ] 02-04: Team roster page with search, member list, and profile viewing
+- [ ] 02-01-PLAN.md -- Database schema (5 tables + storage bucket), server actions, and query functions for teams and profiles
+- [ ] 02-02-PLAN.md -- Team management UI (teams listing, team detail, positions, member assignment)
+- [ ] 02-03-PLAN.md -- Member profile page (personal info, avatar upload, notification preferences, position display)
+- [ ] 02-04-PLAN.md -- Team roster page with search and member profile view page
 
 ### Phase 3: Services & Calendar
 **Goal**: Team leads and admins can create and manage services with a calendar view, including recurring patterns and service duplication
