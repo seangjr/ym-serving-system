@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication & Authorization
 
-- [ ] **AUTH-01**: User can sign up with email and password via Supabase Auth
+- [ ] **AUTH-01**: Admin can invite members via email (no public signup — members pre-exist in attendance system)
 - [ ] **AUTH-02**: User can log in and maintain session across browser refresh
 - [ ] **AUTH-03**: User can log out from any page
 - [ ] **AUTH-04**: User can reset password via email link

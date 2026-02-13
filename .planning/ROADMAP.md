@@ -30,10 +30,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Depends on**: Nothing (first phase)
 **Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, UX-01, UX-02, UX-03, UX-04
 **Success Criteria** (what must be TRUE):
-  1. User can sign up with email/password, log in, and stay logged in across browser refresh
+  1. Admin can invite members via email, user can log in, and stay logged in across browser refresh
   2. User can log out from any page and is redirected to login when unauthenticated
   3. User can reset a forgotten password via email link
-  4. Admin can assign roles (admin, team lead, member) to users, and RLS policies restrict data access by role
+  4. Admin can assign roles (admin, committee, member) to users, and RLS policies restrict data access by role
   5. App shell displays sidebar navigation with all 8 sections, supports toggleable dark mode that persists across sessions, and is responsive across mobile/tablet/desktop
 **Plans**: 5 plans
 
