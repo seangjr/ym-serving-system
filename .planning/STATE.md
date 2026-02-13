@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 2 of 10 (Teams & Member Profiles)
-Plan: 1 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: Executing
-Last activity: 2026-02-13 -- Completed 02-01 schema & data layer (5 tables, 14 actions, 7 queries)
+Last activity: 2026-02-13 -- Completed 02-03 member profile page (tabbed layout, avatar upload, notification prefs)
 
 Progress: [████████████] 12%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 4min
-- Total execution time: 0.42 hours
+- Total plans completed: 8
+- Average duration: 5min
+- Total execution time: 0.62 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
-| 02-teams-and-member-profiles | 1/4 | 5min | 5min |
+| 02-teams-and-member-profiles | 3/4 | 17min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (4min), 01-03 (3min), 01-04 (5min), 01-05 (4min), 02-01 (5min)
+- Last 5 plans: 01-04 (5min), 01-05 (4min), 02-01 (5min), 02-02 (5min), 02-03 (7min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -71,6 +71,9 @@ Recent decisions affecting current work:
 - [02-01]: Team lead authorization checks team_members.role per-team, not global roles table
 - [02-01]: Profile upsert pattern handles 350+ existing members with no profile rows
 - [02-01]: Avatars bucket is public for simplified URL handling (no signed URLs)
+- [02-03]: Position skills fetched via dedicated getOwnPositionSkills query (lightweight profile query)
+- [02-03]: Position preferences read-only -- skill levels managed by team leads per TEAM-06
+- [02-03]: Added created_at to OwnProfile for join date fallback when joined_serving_at is null
 
 ### Pending Todos
 
@@ -84,5 +87,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 02-01 schema & data layer (teams, positions, membership, skills, profiles)
+Stopped at: Completed 02-03 member profile page (tabbed layout, avatar upload, notification prefs, position display)
 Resume file: None
