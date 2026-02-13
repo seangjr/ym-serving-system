@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 1 of 10 (Foundation & Authentication)
-Plan: 3 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: Executing
-Last activity: 2026-02-13 -- Reworked 01-03 role infrastructure to align with ym-attend-4 pattern (DB queries, not JWT claims)
+Last activity: 2026-02-13 -- Completed 01-04 OTP password reset flow (API routes + UI pages)
 
-Progress: [██████░░░░] 6%
+Progress: [████████░░] 8%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 3.7min
-- Total execution time: 0.18 hours
+- Total plans completed: 4
+- Average duration: 4min
+- Total execution time: 0.27 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-and-authentication | 3/5 | 11min | 3.7min |
+| 01-foundation-and-authentication | 4/5 | 16min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-02 (4min), 01-03 (3min)
+- Last 5 plans: 01-01 (4min), 01-02 (4min), 01-03 (3min), 01-04 (5min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -57,6 +57,10 @@ Recent decisions affecting current work:
 - [01-03-rework]: getUserRole() is now async, takes SupabaseClient, returns { role, memberId } -- queries DB instead of parsing JWT
 - [01-03-rework]: Admin role gets dedicated "Admin" nav item with Shield icon in sidebar
 - [01-03-rework]: Added service role admin client (lib/supabase/admin.ts) for bypassing RLS in server-side role queries
+- [01-04]: Used API routes (not server actions) for password reset flow -- enables fetch-based client interaction with JSON responses
+- [01-04]: 3-step OTP flow: request code -> verify code -> set password, with reset token as bridge between steps 2 and 3
+- [01-04]: Dev mode returns OTP code in API response when RESEND_API_KEY is not set for local testing
+- [01-04]: Removed old Supabase built-in reset flow (resetPasswordForEmail) in favor of custom OTP
 
 ### Pending Todos
 
@@ -70,5 +74,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 01-03 rework (role infrastructure aligned with ym-attend-4)
+Stopped at: Completed 01-04 OTP password reset flow (API routes + 3 UI pages)
 Resume file: None
