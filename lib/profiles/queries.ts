@@ -9,6 +9,7 @@ export interface OwnProfile {
   id: string;
   full_name: string;
   email: string;
+  created_at: string;
   member_profiles: {
     phone: string | null;
     avatar_url: string | null;
@@ -107,6 +108,7 @@ export async function getOwnProfile(): Promise<OwnProfile | null> {
       id,
       full_name,
       email,
+      created_at,
       member_profiles(
         phone,
         avatar_url,

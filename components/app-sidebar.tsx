@@ -4,17 +4,35 @@ import {
   BarChart3,
   Calendar,
   CalendarCheck,
+  ChevronsUpDown,
   FolderOpen,
+  LogOut,
   type LucideIcon,
   Megaphone,
+  Monitor,
+  Moon,
   Music,
   Shield,
+  Sun,
+  UserCircle,
   Users,
   Wrench,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -25,14 +43,12 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { UserNav } from "@/components/user-nav";
 import type { AppRole, NavItem } from "@/lib/auth/roles";
 import { getNavItems } from "@/lib/auth/roles";
 
 // ---------------------------------------------------------------------------
-// Icon resolver: maps string icon names from NavItem to Lucide components
+// Icon resolver
 // ---------------------------------------------------------------------------
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -43,6 +59,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Megaphone,
   Music,
   Shield,
+  UserCircle,
   Users,
   Wrench,
 };
@@ -62,16 +79,52 @@ interface AppSidebarProps {
 
 export function AppSidebar({ role, user }: AppSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const navItems: NavItem[] = getNavItems(role);
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const logoSrc =
+    mounted && resolvedTheme === "dark"
+      ? "/white_ym_logo.png"
+      : "/black_ym_logo.jpg";
+
+  const initials = user.email.split("@")[0].slice(0, 2).toUpperCase();
+
+  const handleSignOut = async () => {
+    await fetch("/auth/signout", { method: "POST" });
+    router.push("/login");
+  };
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       {/* Header */}
-      <SidebarHeader className="px-4 py-4">
-        <span className="text-lg font-bold tracking-tight">YM Serving</span>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild tooltip="YM Serving Team">
+              <Link href="/dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center">
+                  <Image
+                    src={logoSrc}
+                    alt="YM Logo"
+                    width={32}
+                    height={32}
+                    className="rounded"
+                  />
+                </div>
+                <div className="grid flex-1 text-left leading-tight">
+                  <span className="truncate text-sm font-bold tracking-tight">
+                    YM Serving Team
+                  </span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
-
-      <SidebarSeparator />
 
       {/* Navigation */}
       <SidebarContent>
@@ -88,7 +141,6 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                       asChild
                       isActive={isActive}
                       tooltip={item.title}
-                      size="lg"
                     >
                       <Link href={item.href}>
                         <Icon className="size-4" />
@@ -103,15 +155,71 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer */}
+      {/* Footer — User menu */}
       <SidebarFooter>
-        <SidebarSeparator />
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs text-muted-foreground">Theme</span>
-          <ThemeToggle />
-        </div>
-        <SidebarSeparator />
-        <UserNav user={user} />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  tooltip={user.email}
+                >
+                  <Avatar className="size-8 rounded-lg">
+                    <AvatarFallback className="rounded-lg text-xs">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{user.email}</span>
+                    <span className="truncate text-xs capitalize text-muted-foreground">
+                      {user.role}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="top"
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="truncate text-sm font-medium">
+                      {user.email}
+                    </span>
+                    <span className="truncate text-xs capitalize text-muted-foreground">
+                      {user.role}
+                    </span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => setTheme("light")}>
+                    <Sun className="size-4" />
+                    Light
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    <Moon className="size-4" />
+                    Dark
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("system")}>
+                    <Monitor className="size-4" />
+                    System
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="size-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );

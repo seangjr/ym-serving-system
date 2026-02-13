@@ -62,6 +62,15 @@ export interface TeamWithMembers {
   }[];
 }
 
+export interface TeamListItem {
+  id: string;
+  name: string;
+  description: string | null;
+  color: string | null;
+  memberCount: number;
+  leadName: string | null;
+}
+
 export interface MemberOption {
   id: string;
   full_name: string;
@@ -94,6 +103,58 @@ export async function getTeams(): Promise<TeamSummary[]> {
 
   if (error) throw error;
   return (data ?? []) as TeamSummary[];
+}
+
+/**
+ * Get all active teams with member counts and lead names.
+ * Used for team listing cards on the /teams page.
+ */
+export async function getTeamsWithLeads(): Promise<TeamListItem[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("serving_teams")
+    .select(
+      `
+      id,
+      name,
+      description,
+      color,
+      team_members(
+        role,
+        members(full_name)
+      )
+    `,
+    )
+    .eq("is_active", true)
+    .order("sort_order")
+    .order("name");
+
+  if (error) throw error;
+
+  // biome-ignore lint: Supabase returns nested relations with dynamic types
+  return (data ?? []).map((team: Record<string, unknown>) => {
+    const teamMembers = (team.team_members ?? []) as {
+      role: string;
+      members: { full_name: string } | { full_name: string }[] | null;
+    }[];
+    const lead = teamMembers.find((m) => m.role === "lead");
+    // Supabase returns members as object (single FK) or array; handle both
+    const leadMembers = lead?.members;
+    const leadName = leadMembers
+      ? Array.isArray(leadMembers)
+        ? (leadMembers[0]?.full_name ?? null)
+        : leadMembers.full_name
+      : null;
+    return {
+      id: team.id as string,
+      name: team.name as string,
+      description: team.description as string | null,
+      color: team.color as string | null,
+      memberCount: teamMembers.length,
+      leadName,
+    };
+  });
 }
 
 /**
