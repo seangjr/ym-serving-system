@@ -1,8 +1,8 @@
-import { Suspense } from "react";
 import { Users } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Suspense } from "react";
 import { RosterMemberCard } from "@/components/teams/roster-member-card";
 import { RosterSearch } from "@/components/teams/roster-search";
+import { Badge } from "@/components/ui/badge";
 import { getTeamRoster, getTeams } from "@/lib/teams/queries";
 
 export const metadata = {
