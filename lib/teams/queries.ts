@@ -111,6 +111,25 @@ export interface MemberOption {
   email: string;
 }
 
+export interface RosterMember {
+  id: string;
+  full_name: string;
+  email: string;
+  avatar_url: string | null;
+  teams: {
+    id: string;
+    name: string;
+    color: string | null;
+    role: "lead" | "member";
+  }[];
+  positions: {
+    name: string;
+    category: string | null;
+    proficiency: string;
+    preference: string;
+  }[];
+}
+
 // ---------------------------------------------------------------------------
 // Queries (all use RLS-protected client)
 // ---------------------------------------------------------------------------
@@ -394,4 +413,90 @@ export async function getAllMembers(
 
   if (error) throw error;
   return (data ?? []) as MemberOption[];
+}
+
+/**
+ * Get all serving members (members with at least one team) for the roster page.
+ * Optionally filter by search query (name/email) and team ID.
+ */
+export async function getTeamRoster(
+  searchQuery?: string,
+  teamId?: string,
+): Promise<RosterMember[]> {
+  const supabase = await createClient();
+
+  // Fetch members who are on at least one team (!inner join)
+  let query = supabase.from("members").select(
+    `
+      id,
+      full_name,
+      email,
+      member_profiles(avatar_url),
+      team_members!inner(
+        id,
+        role,
+        serving_teams(id, name, color)
+      ),
+      member_position_skills(
+        proficiency,
+        preference,
+        team_positions(name, category)
+      )
+    `,
+  );
+
+  if (searchQuery) {
+    query = query.or(
+      `full_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`,
+    );
+  }
+
+  const { data, error } = await query.order("full_name");
+
+  if (error) throw error;
+
+  // Transform into flat RosterMember shape
+  const members: RosterMember[] = (data ?? []).map(
+    (row: Record<string, unknown>) => {
+      const profile = row.member_profiles as {
+        avatar_url: string | null;
+      } | null;
+      const teamMemberships = (row.team_members ?? []) as {
+        id: string;
+        role: "lead" | "member";
+        serving_teams: { id: string; name: string; color: string | null };
+      }[];
+      const skills = (row.member_position_skills ?? []) as {
+        proficiency: string;
+        preference: string;
+        team_positions: { name: string; category: string | null };
+      }[];
+
+      return {
+        id: row.id as string,
+        full_name: row.full_name as string,
+        email: row.email as string,
+        avatar_url: profile?.avatar_url ?? null,
+        teams: teamMemberships.map((tm) => ({
+          id: tm.serving_teams.id,
+          name: tm.serving_teams.name,
+          color: tm.serving_teams.color,
+          role: tm.role,
+        })),
+        positions: skills.map((s) => ({
+          name: s.team_positions.name,
+          category: s.team_positions.category,
+          proficiency: s.proficiency,
+          preference: s.preference,
+        })),
+      };
+    },
+  );
+
+  // If filtering by team, only keep members on that team
+  if (teamId) {
+    return members.filter((m) => m.teams.some((t) => t.id === teamId));
+  }
+
+  return members;
 }
