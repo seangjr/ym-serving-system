@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 Phase: 1 of 10 (Foundation & Authentication)
 Plan: 3 of 5 in current phase
 Status: Executing
-Last activity: 2026-02-13 -- Completed 01-02 (Auth flow UI) and 01-03 (Role management infrastructure)
+Last activity: 2026-02-13 -- Reworked 01-03 role infrastructure to align with ym-attend-4 pattern (DB queries, not JWT claims)
 
 Progress: [██████░░░░] 6%
 
@@ -51,9 +51,12 @@ Recent decisions affecting current work:
 - [01-02]: Used useActionState (React 19) for inline form error display instead of redirect-based error handling
 - [01-02]: useSearchParams extracted into Suspense-wrapped ErrorToast component for static prerendering compatibility
 - [01-02]: Sonner Toaster added to root layout for global toast notification support
-- [01-03]: Manual JWT decode (split+atob) instead of jwt-decode library -- JWT already verified by Supabase
-- [01-03]: Navigation items use string icon names for server-compatibility -- consuming component resolves icons
-- [01-03]: getUserRole() defaults to 'member' on any error -- safe default for authorization
+- [01-03-rework]: Reworked role infrastructure to align with ym-attend-4 pattern (DB queries via members/assignments/roles, not JWT claims)
+- [01-03-rework]: Removed custom_access_token_hook, app_role enum, user_roles table -- shared Supabase project already has roles/members/assignments
+- [01-03-rework]: Added Committee role insert migration for serving team leads
+- [01-03-rework]: getUserRole() is now async, takes SupabaseClient, returns { role, memberId } -- queries DB instead of parsing JWT
+- [01-03-rework]: Admin role gets dedicated "Admin" nav item with Shield icon in sidebar
+- [01-03-rework]: Added service role admin client (lib/supabase/admin.ts) for bypassing RLS in server-side role queries
 
 ### Pending Todos
 
@@ -67,5 +70,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 01-02-PLAN.md and 01-03-PLAN.md
+Stopped at: Completed 01-03 rework (role infrastructure aligned with ym-attend-4)
 Resume file: None
