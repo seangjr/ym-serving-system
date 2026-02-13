@@ -35,13 +35,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can reset a forgotten password via email link
   4. Admin can assign roles (admin, team lead, member) to users, and RLS policies restrict data access by role
   5. App shell displays sidebar navigation with all 8 sections, supports toggleable dark mode that persists across sessions, and is responsive across mobile/tablet/desktop
-**Plans**: 4 plans
+**Plans**: 5 plans
 
 Plans:
 - [ ] 01-01-PLAN.md -- Supabase client infrastructure, middleware, and auth route handlers
 - [ ] 01-02-PLAN.md -- Auth flow UI (login, password reset, update password) with server actions
 - [ ] 01-03-PLAN.md -- Role management SQL migration, RLS policies, and TypeScript role helpers
 - [ ] 01-04-PLAN.md -- App shell (Inter font, ThemeProvider, role-filtered sidebar, dark mode, responsive layout)
+- [ ] 01-05-PLAN.md -- Admin panel for user role management (AUTH-05)
 
 ### Phase 2: Teams & Member Profiles
 **Goal**: Admins and team leads can organize ministry teams with positions, and members can manage their own profiles
@@ -210,7 +211,7 @@ Note: Phases 3, 7, 8, 9 depend only on Phase 1 and can be parallelized after Pha
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Authentication | 0/4 | Not started | - |
+| 1. Foundation & Authentication | 0/5 | Not started | - |
 | 2. Teams & Member Profiles | 0/4 | Not started | - |
 | 3. Services & Calendar | 0/5 | Not started | - |
 | 4. Scheduling & Assignments | 0/5 | Not started | - |
