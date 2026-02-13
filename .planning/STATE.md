@@ -9,29 +9,29 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 2 of 10 (Teams & Member Profiles) -- COMPLETE
-Plan: 4 of 4 in current phase
-Status: Phase Complete
-Last activity: 2026-02-13 -- Completed 02-04 team roster page and member profile view
+Phase: 2 of 10 (Teams & Member Profiles) -- Gap Closure
+Plan: 7 of 7 in current phase (4 original + 3 gap closure)
+Status: Executing Gap Closure Plans
+Last activity: 2026-02-13 -- Completed 02-07 profile fields redirect & dropdown fix
 
 Progress: [██████████████] 14%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 5min
-- Total execution time: 0.69 hours
+- Total execution time: 0.74 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
-| 02-teams-and-member-profiles | 4/4 | 21min | 5min |
+| 02-teams-and-member-profiles | 5/7 | 24min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-05 (4min), 02-01 (5min), 02-02 (10min), 02-03 (7min), 02-04 (4min)
+- Last 5 plans: 02-01 (5min), 02-02 (10min), 02-03 (7min), 02-04 (4min), 02-07 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -83,6 +83,9 @@ Recent decisions affecting current work:
 - [02-04]: Search uses URL params (?q=, ?team=) for shareable/bookmarkable results
 - [02-04]: All authenticated users can view all profile fields -- noted for future privacy restriction
 - [02-04]: Team filter chips are server-rendered anchor tags for zero JS overhead
+- [02-07]: Personal info fields (phone, emergency contact, birthdate) read/written from shared members table, not member_profiles
+- [02-07]: member_profiles retains only serving-specific fields: avatar_url, joined_serving_at, notification prefs
+- [02-07]: SelectContent position="popper" with max-h-48 for fixed dropdown height
 
 ### Pending Todos
 
@@ -96,5 +99,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 02-04 team roster & member profile view -- Phase 2 COMPLETE (all 4 plans done)
+Stopped at: Completed 02-07 profile fields redirect & dropdown fix (gap closure)
 Resume file: None
