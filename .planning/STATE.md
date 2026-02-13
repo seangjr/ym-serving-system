@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 1 of 10 (Foundation & Authentication)
-Plan: 4 of 5 in current phase
+Plan: 5 of 5 in current phase
 Status: Executing
-Last activity: 2026-02-13 -- Completed 01-04 OTP password reset flow (API routes + UI pages)
+Last activity: 2026-02-13 -- Completed 01-05 admin panel rework (DB-based roles/assignments)
 
-Progress: [████████░░] 8%
+Progress: [██████████] 10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 4min
-- Total execution time: 0.27 hours
+- Total execution time: 0.33 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-and-authentication | 4/5 | 16min | 4min |
+| 01-foundation-and-authentication | 5/5 | 20min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-02 (4min), 01-03 (3min), 01-04 (5min)
+- Last 5 plans: 01-01 (4min), 01-02 (4min), 01-03 (3min), 01-04 (5min), 01-05 (4min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -61,6 +61,10 @@ Recent decisions affecting current work:
 - [01-04]: 3-step OTP flow: request code -> verify code -> set password, with reset token as bridge between steps 2 and 3
 - [01-04]: Dev mode returns OTP code in API response when RESEND_API_KEY is not set for local testing
 - [01-04]: Removed old Supabase built-in reset flow (resetPasswordForEmail) in favor of custom OTP
+- [01-05-rework]: Admin panel uses shared roles/assignments tables instead of wrong user_roles approach
+- [01-05-rework]: getUsers() joins members+assignments+roles, derives highestServingRole (admin/committee/member)
+- [01-05-rework]: updateUserRole() only manages Admin/Committee assignments, preserves other roles (Zone Leader, CG Leader)
+- [01-05-rework]: Mobile card + desktop table responsive layout for user role management
 
 ### Pending Todos
 
@@ -74,5 +78,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 01-04 OTP password reset flow (API routes + 3 UI pages)
+Stopped at: Completed 01-05 admin panel rework (DB-based role management)
 Resume file: None
