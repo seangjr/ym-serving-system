@@ -29,18 +29,17 @@ export async function updateOwnProfile(
   }
 
   // Clean empty strings to null for DB storage
-  const profileData: Record<string, unknown> = {
-    member_id: memberId,
-    updated_at: new Date().toISOString(),
-  };
+  const memberUpdates: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(parsed.data)) {
-    profileData[key] = value === "" ? null : value;
+    memberUpdates[key] = value === "" ? null : value;
   }
 
+  // Write personal info (phone, emergency contact, birthdate) to shared members table
   const admin = createAdminClient();
   const { error } = await admin
-    .from("member_profiles")
-    .upsert(profileData, { onConflict: "member_id" });
+    .from("members")
+    .update(memberUpdates)
+    .eq("id", memberId);
 
   if (error) return { error: error.message };
 
@@ -137,18 +136,17 @@ export async function adminUpdateMemberProfile(
   }
 
   // Clean empty strings to null for DB storage
-  const profileData: Record<string, unknown> = {
-    member_id: memberId,
-    updated_at: new Date().toISOString(),
-  };
+  const memberUpdates: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(parsed.data)) {
-    profileData[key] = value === "" ? null : value;
+    memberUpdates[key] = value === "" ? null : value;
   }
 
+  // Write personal info (phone, emergency contact, birthdate) to shared members table
   const admin = createAdminClient();
   const { error } = await admin
-    .from("member_profiles")
-    .upsert(profileData, { onConflict: "member_id" });
+    .from("members")
+    .update(memberUpdates)
+    .eq("id", memberId);
 
   if (error) return { error: error.message };
 

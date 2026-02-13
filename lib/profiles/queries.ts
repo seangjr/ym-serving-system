@@ -9,13 +9,13 @@ export interface OwnProfile {
   id: string;
   full_name: string;
   email: string;
+  phone: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  birthdate: string | null;
   created_at: string;
   member_profiles: {
-    phone: string | null;
     avatar_url: string | null;
-    emergency_contact_name: string | null;
-    emergency_contact_phone: string | null;
-    birthdate: string | null;
     joined_serving_at: string | null;
     notify_email: boolean;
     notify_assignment_changes: boolean;
@@ -28,12 +28,12 @@ export interface MemberProfile {
   id: string;
   full_name: string;
   email: string;
+  phone: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  birthdate: string | null;
   member_profiles: {
-    phone: string | null;
     avatar_url: string | null;
-    emergency_contact_name: string | null;
-    emergency_contact_phone: string | null;
-    birthdate: string | null;
     joined_serving_at: string | null;
     notify_email: boolean;
     notify_assignment_changes: boolean;
@@ -108,13 +108,13 @@ export async function getOwnProfile(): Promise<OwnProfile | null> {
       id,
       full_name,
       email,
+      phone,
+      emergency_contact_name,
+      emergency_contact_phone,
+      birthdate,
       created_at,
       member_profiles(
-        phone,
         avatar_url,
-        emergency_contact_name,
-        emergency_contact_phone,
-        birthdate,
         joined_serving_at,
         notify_email,
         notify_assignment_changes,
@@ -150,12 +150,12 @@ export async function getMemberProfile(
       id,
       full_name,
       email,
+      phone,
+      emergency_contact_name,
+      emergency_contact_phone,
+      birthdate,
       member_profiles(
-        phone,
         avatar_url,
-        emergency_contact_name,
-        emergency_contact_phone,
-        birthdate,
         joined_serving_at,
         notify_email,
         notify_assignment_changes,

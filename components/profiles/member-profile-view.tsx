@@ -74,13 +74,13 @@ export function MemberProfileView({ member }: MemberProfileViewProps) {
                 <Mail className="size-4" />
                 {member.email}
               </a>
-              {profile?.phone ? (
+              {member.phone ? (
                 <a
-                  href={`tel:${profile.phone}`}
+                  href={`tel:${member.phone}`}
                   className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <PhoneIcon className="size-4" />
-                  {profile.phone}
+                  {member.phone}
                 </a>
               ) : (
                 <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">

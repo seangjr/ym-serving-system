@@ -57,12 +57,12 @@ export default async function ProfilePage() {
               initialData={{
                 full_name: profile.full_name,
                 email: profile.email,
-                phone: profileData?.phone ?? "",
+                phone: profile.phone ?? "",
                 emergency_contact_name:
-                  profileData?.emergency_contact_name ?? "",
+                  profile.emergency_contact_name ?? "",
                 emergency_contact_phone:
-                  profileData?.emergency_contact_phone ?? "",
-                birthdate: profileData?.birthdate ?? "",
+                  profile.emergency_contact_phone ?? "",
+                birthdate: profile.birthdate ?? "",
               }}
               memberId={memberId}
             />
