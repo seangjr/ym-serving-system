@@ -12,8 +12,8 @@ This roadmap delivers a worship team scheduling and management app that replaces
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Authentication** - Supabase auth, role-based access, app shell with sidebar navigation and dark mode
-- [ ] **Phase 2: Teams & Member Profiles** - Ministry-agnostic team/position structure and member profile management
+- [x] **Phase 1: Foundation & Authentication** - Supabase auth, role-based access, app shell with sidebar navigation and dark mode
+- [x] **Phase 2: Teams & Member Profiles** - Ministry-agnostic team/position structure and member profile management
 - [ ] **Phase 3: Services & Calendar** - Service creation, calendar views, recurring patterns, and service templates
 - [ ] **Phase 4: Scheduling & Assignments** - Assigning members to positions with conflict detection and templates
 - [ ] **Phase 5: Availability Management** - Member blackout dates, recurring unavailability, and scheduling warnings
@@ -211,8 +211,8 @@ Note: Phases 3, 7, 8, 9 depend only on Phase 1 and can be parallelized after Pha
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Authentication | 0/5 | Not started | - |
-| 2. Teams & Member Profiles | 0/4 | Not started | - |
+| 1. Foundation & Authentication | 5/5 | ✓ Complete | 2026-02-13 |
+| 2. Teams & Member Profiles | 4/4 | ✓ Complete | 2026-02-13 |
 | 3. Services & Calendar | 0/5 | Not started | - |
 | 4. Scheduling & Assignments | 0/5 | Not started | - |
 | 5. Availability Management | 0/3 | Not started | - |
