@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 2 of 10 (Teams & Member Profiles) -- Gap Closure
-Plan: 7 of 7 in current phase (4 original + 3 gap closure)
+Plan: 6 of 7 completed in current phase (4 original + 3 gap closure)
 Status: Executing Gap Closure Plans
-Last activity: 2026-02-13 -- Completed 02-07 profile fields redirect & dropdown fix
+Last activity: 2026-02-13 -- Completed 02-05 sidebar nav fix (Teams link + profile to dropdown)
 
 Progress: [██████████████] 14%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: 5min
-- Total execution time: 0.74 hours
+- Total execution time: 0.79 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
-| 02-teams-and-member-profiles | 5/7 | 24min | 5min |
+| 02-teams-and-member-profiles | 6/7 | 27min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (5min), 02-02 (10min), 02-03 (7min), 02-04 (4min), 02-07 (3min)
+- Last 5 plans: 02-02 (10min), 02-03 (7min), 02-04 (4min), 02-07 (3min), 02-05 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -83,6 +83,8 @@ Recent decisions affecting current work:
 - [02-04]: Search uses URL params (?q=, ?team=) for shareable/bookmarkable results
 - [02-04]: All authenticated users can view all profile fields -- noted for future privacy restriction
 - [02-04]: Team filter chips are server-rendered anchor tags for zero JS overhead
+- [02-05]: Layers icon used for Teams nav to differentiate from Users icon on Team Roster
+- [02-05]: My Profile placed in user dropdown (personal items) rather than sidebar nav (feature items)
 - [02-07]: Personal info fields (phone, emergency contact, birthdate) read/written from shared members table, not member_profiles
 - [02-07]: member_profiles retains only serving-specific fields: avatar_url, joined_serving_at, notification prefs
 - [02-07]: SelectContent position="popper" with max-h-48 for fixed dropdown height
@@ -99,5 +101,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 02-07 profile fields redirect & dropdown fix (gap closure)
+Stopped at: Completed 02-05 sidebar nav fix -- Teams link added, My Profile moved to dropdown
 Resume file: None
