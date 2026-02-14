@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getUserRole, isAdminOrCommittee } from "@/lib/auth/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { getMemberConflicts } from "./queries";
+import { getMemberConflicts, getTemplates } from "./queries";
 import {
   addServicePositionSchema,
   assignMemberSchema,
@@ -463,4 +463,12 @@ export async function deleteTemplate(
   if (error) return { error: error.message };
 
   return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// Template fetching (server action wrapper for client components)
+// ---------------------------------------------------------------------------
+
+export async function fetchTemplates(teamId?: string) {
+  return getTemplates(teamId);
 }

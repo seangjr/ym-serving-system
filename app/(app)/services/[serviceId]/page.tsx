@@ -118,6 +118,8 @@ export default async function ServiceDetailPage({
               isCancelled: service.is_cancelled,
             }}
             serviceTypes={serviceTypesList}
+            teams={allTeams.map((t) => ({ id: t.id, name: t.name }))}
+            teamsWithPositions={teamIdsWithPositions}
           />
         )}
       </div>
