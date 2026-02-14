@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 3 of 10 (Services & Calendar)
-Plan: 2 of 3 completed in current phase
-Status: In Progress
-Last activity: 2026-02-14 -- Completed 03-02 services dashboard UI (calendar, service list, stats, create/edit dialog)
+Phase: 3 of 10 (Services & Calendar) -- COMPLETE
+Plan: 3 of 3 completed in current phase
+Status: Phase Complete
+Last activity: 2026-02-14 -- Completed 03-03 advanced service features (recurring, duplicate, types, detail page)
 
-Progress: [████████████████████] 20%
+Progress: [██████████████████████████████] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 15
 - Average duration: 4min
-- Total execution time: 0.98 hours
+- Total execution time: 1.05 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [████████████████████] 20%
 |-------|-------|-------|----------|
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
 | 02-teams-and-member-profiles | 7/7 | 31min | 4min |
-| 03-services-and-calendar | 2/3 | 7min | 4min |
+| 03-services-and-calendar | 3/3 | 11min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 02-07 (3min), 02-05 (3min), 02-06 (4min), 03-01 (3min), 03-02 (4min)
+- Last 5 plans: 02-05 (3min), 02-06 (4min), 03-01 (3min), 03-02 (4min), 03-03 (4min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -99,6 +99,10 @@ Recent decisions affecting current work:
 - [03-02]: Dashboard page is server component; DashboardCalendar and DashboardActions are thin client wrappers for state
 - [03-02]: Service list items Link-wrapped for future /services/[id] navigation
 - [03-02]: Edit dialog in ServiceList managed via local state (editingService) rather than URL params
+- [03-03]: Split button pattern for dashboard actions -- primary Create Service + dropdown for recurring/types
+- [03-03]: ServiceTypeManager uses inline forms (matching PositionManager pattern) for consistency
+- [03-03]: Service detail page is server component with thin client wrapper for action buttons
+- [03-03]: AlertDialog used for delete confirmations instead of window.confirm (accessible, consistent)
 
 ### Pending Todos
 
@@ -112,5 +116,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 03-02-PLAN.md (services dashboard UI)
+Stopped at: Completed 03-03-PLAN.md (advanced service features -- Phase 3 complete)
 Resume file: None
