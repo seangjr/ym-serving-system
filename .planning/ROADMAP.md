@@ -95,9 +95,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Database schema (service_positions, service_assignments, schedule_templates) + lib/assignments module (schemas, types, queries, server actions)
-- [ ] 04-02-PLAN.md -- Assignment UI on service detail page: combobox-per-slot, conflict detection/confirmation dialog, position grouping by team/category, inline position add/remove
-- [ ] 04-03-PLAN.md -- Template save/load workflow + dashboard stats integration (real unassigned/pending counts)
+- [x] 04-01-PLAN.md -- Database schema (service_positions, service_assignments, schedule_templates) + lib/assignments module (schemas, types, queries, server actions)
+- [x] 04-02-PLAN.md -- Assignment UI on service detail page: combobox-per-slot, conflict detection/confirmation dialog, position grouping by team/category, inline position add/remove
+- [x] 04-03-PLAN.md -- Template save/load workflow + dashboard stats integration (real unassigned/pending counts)
 
 ### Phase 5: Availability Management
 **Goal**: Members can manage their availability, and the scheduling system surfaces conflicts when assigning unavailable members
@@ -213,7 +213,7 @@ Note: Phases 3, 7, 8, 9 depend only on Phase 1 and can be parallelized after Pha
 | 1. Foundation & Authentication | 5/5 | ✓ Complete | 2026-02-13 |
 | 2. Teams & Member Profiles | 4/4 | ✓ Complete | 2026-02-13 |
 | 3. Services & Calendar | 3/3 | ✓ Complete | 2026-02-14 |
-| 4. Scheduling & Assignments | 0/3 | Not started | - |
+| 4. Scheduling & Assignments | 3/3 | ✓ Complete | 2026-02-14 |
 | 5. Availability Management | 0/3 | Not started | - |
 | 6. Accept/Decline & Notifications | 0/5 | Not started | - |
 | 7. Song Library & Setlists | 0/3 | Not started | - |
