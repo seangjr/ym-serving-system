@@ -154,6 +154,22 @@ export async function getServiceTypes(): Promise<ServiceType[]> {
 }
 
 /**
+ * Get all service types (including inactive), ordered by sort_order.
+ * Used by admin type management UI.
+ */
+export async function getAllServiceTypes(): Promise<ServiceType[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("service_types")
+    .select("*")
+    .order("sort_order");
+
+  if (error) throw error;
+  return (data ?? []) as ServiceType[];
+}
+
+/**
  * Get basic service stats for the dashboard.
  * Phase 4 will add unassignedPositions and pendingConfirmations.
  */

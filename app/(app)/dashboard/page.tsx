@@ -2,8 +2,9 @@ import type { CalendarService } from "@/components/services/service-calendar";
 import { ServiceList } from "@/components/services/service-list";
 import { ServiceStats } from "@/components/services/service-stats";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getUserRole, isAdminOrCommittee } from "@/lib/auth/roles";
+import { getUserRole, isAdmin, isAdminOrCommittee } from "@/lib/auth/roles";
 import {
+  getAllServiceTypes,
   getServiceStats,
   getServicesByMonth,
   getServiceTypes,
@@ -25,12 +26,16 @@ export default async function DashboardPage() {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1; // 1-indexed for query
 
-  const [monthServices, upcoming, stats, serviceTypes] = await Promise.all([
-    getServicesByMonth(currentYear, currentMonth),
-    getUpcomingServices(10),
-    getServiceStats(),
-    getServiceTypes(),
-  ]);
+  const isAdminUser = isAdmin(role);
+
+  const [monthServices, upcoming, stats, serviceTypes, allServiceTypes] =
+    await Promise.all([
+      getServicesByMonth(currentYear, currentMonth),
+      getUpcomingServices(10),
+      getServiceStats(),
+      getServiceTypes(),
+      isAdminUser ? getAllServiceTypes() : Promise.resolve([]),
+    ]);
 
   // Transform services for calendar display
   const calendarServices: CalendarService[] = monthServices.map((s) => ({
@@ -77,7 +82,18 @@ export default async function DashboardPage() {
           </p>
         </div>
         {isAdminOrCommittee(role) && (
-          <DashboardActions serviceTypes={serviceTypesList} />
+          <DashboardActions
+            serviceTypes={serviceTypesList}
+            allServiceTypes={allServiceTypes.map((t) => ({
+              id: t.id,
+              name: t.name,
+              label: t.label,
+              color: t.color,
+              sortOrder: t.sort_order,
+              isActive: t.is_active,
+            }))}
+            isAdmin={isAdminUser}
+          />
         )}
       </div>
 
