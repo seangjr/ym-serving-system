@@ -45,8 +45,8 @@ export interface ServiceDetail extends ServiceSummary {
 
 export interface ServiceStats {
   upcomingCount: number;
-  unassignedPositions: number; // Phase 4 placeholder
-  pendingConfirmations: number; // Phase 4 placeholder
+  unassignedPositions: number;
+  pendingConfirmations: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -170,24 +170,78 @@ export async function getAllServiceTypes(): Promise<ServiceType[]> {
 }
 
 /**
- * Get basic service stats for the dashboard.
- * Phase 4 will add unassignedPositions and pendingConfirmations.
+ * Get service stats for the dashboard with real assignment data.
+ *
+ * - upcomingCount: number of upcoming non-cancelled services
+ * - unassignedPositions: service_positions for upcoming services without assignments
+ * - pendingConfirmations: service_assignments with status='pending' for upcoming services
  */
 export async function getServiceStats(): Promise<ServiceStats> {
   const supabase = await createClient();
   const today = format(new Date(), "yyyy-MM-dd");
 
-  const { count, error } = await supabase
+  // 1. Count upcoming non-cancelled services
+  const { count: upcomingCount, error: upcomingError } = await supabase
     .from("services")
     .select("id", { count: "exact", head: true })
     .gte("service_date", today)
     .eq("is_cancelled", false);
 
-  if (error) throw error;
+  if (upcomingError) throw upcomingError;
+
+  // 2. Get IDs of upcoming non-cancelled services
+  const { data: upcomingServices, error: idsError } = await supabase
+    .from("services")
+    .select("id")
+    .gte("service_date", today)
+    .eq("is_cancelled", false);
+
+  if (idsError) throw idsError;
+
+  const upcomingIds = (upcomingServices ?? []).map((s) => s.id);
+
+  if (upcomingIds.length === 0) {
+    return {
+      upcomingCount: upcomingCount ?? 0,
+      unassignedPositions: 0,
+      pendingConfirmations: 0,
+    };
+  }
+
+  // 3. Count total service_positions for upcoming services
+  const { count: totalPositions, error: posError } = await supabase
+    .from("service_positions")
+    .select("id", { count: "exact", head: true })
+    .in("service_id", upcomingIds);
+
+  if (posError) throw posError;
+
+  // 4. Count service_assignments for upcoming services (via service_positions join)
+  const { count: totalAssignments, error: assignError } = await supabase
+    .from("service_assignments")
+    .select("id, service_positions!inner(service_id)", {
+      count: "exact",
+      head: true,
+    })
+    .in("service_positions.service_id", upcomingIds);
+
+  if (assignError) throw assignError;
+
+  // 5. Count pending service_assignments for upcoming services
+  const { count: pendingCount, error: pendingError } = await supabase
+    .from("service_assignments")
+    .select("id, service_positions!inner(service_id)", {
+      count: "exact",
+      head: true,
+    })
+    .in("service_positions.service_id", upcomingIds)
+    .eq("status", "pending");
+
+  if (pendingError) throw pendingError;
 
   return {
-    upcomingCount: count ?? 0,
-    unassignedPositions: 0, // Phase 4: count positions without assignments
-    pendingConfirmations: 0, // Phase 4: count unconfirmed assignments
+    upcomingCount: upcomingCount ?? 0,
+    unassignedPositions: (totalPositions ?? 0) - (totalAssignments ?? 0),
+    pendingConfirmations: pendingCount ?? 0,
   };
 }

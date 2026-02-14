@@ -44,11 +44,11 @@ export function ServiceStats({ stats }: ServiceStatsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.unassignedPositions}</div>
-          {stats.unassignedPositions === 0 && (
-            <p className="text-xs text-muted-foreground">
-              Available after scheduling
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground">
+            {stats.unassignedPositions === 0
+              ? "All positions filled"
+              : "Positions needing members"}
+          </p>
         </CardContent>
       </Card>
 
@@ -62,11 +62,11 @@ export function ServiceStats({ stats }: ServiceStatsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.pendingConfirmations}</div>
-          {stats.pendingConfirmations === 0 && (
-            <p className="text-xs text-muted-foreground">
-              Available after scheduling
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground">
+            {stats.pendingConfirmations === 0
+              ? "No pending responses"
+              : "Awaiting member responses"}
+          </p>
         </CardContent>
       </Card>
     </div>
