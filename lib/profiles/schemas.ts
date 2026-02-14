@@ -2,13 +2,14 @@ import { z } from "zod";
 
 // ---------------------------------------------------------------------------
 // Profile update schema
+// Field names match the shared `members` table column names
 // ---------------------------------------------------------------------------
 
 export const updateProfileSchema = z.object({
-  phone: z.string().max(20).optional().or(z.literal("")),
+  contact_number: z.string().max(20).optional().or(z.literal("")),
   emergency_contact_name: z.string().max(100).optional().or(z.literal("")),
-  emergency_contact_phone: z.string().max(20).optional().or(z.literal("")),
-  birthdate: z
+  emergency_contact_number: z.string().max(20).optional().or(z.literal("")),
+  date_of_birth: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD format")
     .optional()

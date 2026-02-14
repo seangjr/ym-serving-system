@@ -43,6 +43,12 @@ export const removeServicePositionSchema = z.object({
   serviceId: z.string().uuid("Invalid service ID."),
 });
 
+export const reorderPositionsSchema = z.object({
+  serviceId: z.string().uuid("Invalid service ID."),
+  /** Ordered list of service_position IDs in their new order. */
+  positionIds: z.array(z.string().uuid()).min(1, "At least one position required."),
+});
+
 // ---------------------------------------------------------------------------
 // Template schemas
 // ---------------------------------------------------------------------------
@@ -58,7 +64,6 @@ export const saveTemplateSchema = z.object({
       z.literal(""),
     ])
     .optional(),
-  teamId: z.string().uuid("Invalid team ID."),
   serviceId: z.string().uuid("Invalid service ID."),
 });
 
@@ -84,6 +89,7 @@ export type AddServicePositionInput = z.infer<typeof addServicePositionSchema>;
 export type RemoveServicePositionInput = z.infer<
   typeof removeServicePositionSchema
 >;
+export type ReorderPositionsInput = z.infer<typeof reorderPositionsSchema>;
 export type SaveTemplateInput = z.infer<typeof saveTemplateSchema>;
 export type LoadTemplateInput = z.infer<typeof loadTemplateSchema>;
 export type DeleteTemplateInput = z.infer<typeof deleteTemplateSchema>;

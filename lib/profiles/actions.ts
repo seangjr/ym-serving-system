@@ -4,10 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getUserRole, isAdminOrCommittee } from "@/lib/auth/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import {
-  notificationPreferencesSchema,
-  updateProfileSchema,
-} from "./schemas";
+import { notificationPreferencesSchema, updateProfileSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // updateOwnProfile — any authenticated user can update their own profile
@@ -29,16 +26,15 @@ export async function updateOwnProfile(
   }
 
   // Clean empty strings to null for DB storage
-  const memberUpdates: Record<string, unknown> = {};
+  const updateData: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(parsed.data)) {
-    memberUpdates[key] = value === "" ? null : value;
+    updateData[key] = value === "" ? null : value;
   }
 
-  // Write personal info (phone, emergency contact, birthdate) to shared members table
   const admin = createAdminClient();
   const { error } = await admin
     .from("members")
-    .update(memberUpdates)
+    .update(updateData)
     .eq("id", memberId);
 
   if (error) return { error: error.message };
@@ -136,16 +132,15 @@ export async function adminUpdateMemberProfile(
   }
 
   // Clean empty strings to null for DB storage
-  const memberUpdates: Record<string, unknown> = {};
+  const updateData: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(parsed.data)) {
-    memberUpdates[key] = value === "" ? null : value;
+    updateData[key] = value === "" ? null : value;
   }
 
-  // Write personal info (phone, emergency contact, birthdate) to shared members table
   const admin = createAdminClient();
   const { error } = await admin
     .from("members")
-    .update(memberUpdates)
+    .update(updateData)
     .eq("id", memberId);
 
   if (error) return { error: error.message };

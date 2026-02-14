@@ -19,13 +19,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   deleteTemplate,
@@ -38,15 +31,6 @@ import { saveTemplateSchema } from "@/lib/assignments/schemas";
 import type { TemplateListItem } from "@/lib/assignments/types";
 
 // ---------------------------------------------------------------------------
-// Shared types
-// ---------------------------------------------------------------------------
-
-interface TeamOption {
-  id: string;
-  name: string;
-}
-
-// ---------------------------------------------------------------------------
 // SaveTemplateDialog
 // ---------------------------------------------------------------------------
 
@@ -54,21 +38,18 @@ interface SaveTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   serviceId: string;
-  teams: TeamOption[];
 }
 
 export function SaveTemplateDialog({
   open,
   onOpenChange,
   serviceId,
-  teams,
 }: SaveTemplateDialogProps) {
   const [isPending, startTransition] = useTransition();
 
   const {
     register,
     handleSubmit,
-    setValue,
     reset,
     formState: { errors },
   } = useForm<SaveTemplateInput>({
@@ -76,7 +57,6 @@ export function SaveTemplateDialog({
     defaultValues: {
       name: "",
       description: "",
-      teamId: "",
       serviceId,
     },
   });
@@ -84,7 +64,7 @@ export function SaveTemplateDialog({
   // Reset form when dialog opens
   useEffect(() => {
     if (open) {
-      reset({ name: "", description: "", teamId: "", serviceId });
+      reset({ name: "", description: "", serviceId });
     }
   }, [open, reset, serviceId]);
 
@@ -106,7 +86,7 @@ export function SaveTemplateDialog({
         <DialogHeader>
           <DialogTitle>Save as Template</DialogTitle>
           <DialogDescription>
-            Save the current position configuration as a reusable template.
+            Save all position slots on this service as a reusable template.
           </DialogDescription>
         </DialogHeader>
 
@@ -116,7 +96,7 @@ export function SaveTemplateDialog({
             <Label htmlFor="template-name">Template Name</Label>
             <Input
               id="template-name"
-              placeholder="e.g. Standard Sunday Morning"
+              placeholder="e.g. Standard Sunday Service"
               {...register("name")}
             />
             {errors.name && (
@@ -139,30 +119,6 @@ export function SaveTemplateDialog({
             {errors.description && (
               <p className="text-xs text-destructive">
                 {errors.description.message}
-              </p>
-            )}
-          </div>
-
-          {/* Team selector */}
-          <div className="flex flex-col gap-1.5">
-            <Label>Team</Label>
-            <Select
-              onValueChange={(value) => setValue("teamId", value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a team" />
-              </SelectTrigger>
-              <SelectContent position="popper" className="max-h-48">
-                {teams.map((team) => (
-                  <SelectItem key={team.id} value={team.id}>
-                    {team.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.teamId && (
-              <p className="text-xs text-destructive">
-                {errors.teamId.message}
               </p>
             )}
           </div>
@@ -197,36 +153,33 @@ interface LoadTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   serviceId: string;
-  teams: TeamOption[];
-  /** Team IDs that already have positions on this service */
-  teamsWithPositions: string[];
+  serviceTypeId: string | null;
+  hasExistingPositions: boolean;
 }
 
 export function LoadTemplateDialog({
   open,
   onOpenChange,
   serviceId,
-  teams,
-  teamsWithPositions,
+  serviceTypeId,
+  hasExistingPositions,
 }: LoadTemplateDialogProps) {
   const [isPending, startTransition] = useTransition();
   const [templates, setTemplates] = useState<TemplateListItem[]>([]);
-  const [filterTeamId, setFilterTeamId] = useState<string>("all");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
     null,
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch templates when dialog opens
+  // Fetch templates when dialog opens (filtered by service type)
   useEffect(() => {
     if (!open) {
       setSelectedTemplateId(null);
-      setFilterTeamId("all");
       return;
     }
 
     setIsLoading(true);
-    fetchTemplates()
+    fetchTemplates(serviceTypeId ?? undefined)
       .then((data) => {
         setTemplates(data);
       })
@@ -236,17 +189,9 @@ export function LoadTemplateDialog({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [open]);
-
-  const filteredTemplates =
-    filterTeamId === "all"
-      ? templates
-      : templates.filter((t) => t.teamId === filterTeamId);
+  }, [open, serviceTypeId]);
 
   const selectedTemplate = templates.find((t) => t.id === selectedTemplateId);
-  const hasExistingPositions =
-    selectedTemplate?.teamId != null &&
-    teamsWithPositions.includes(selectedTemplate.teamId);
 
   function handleLoad() {
     if (!selectedTemplateId) return;
@@ -256,13 +201,13 @@ export function LoadTemplateDialog({
         templateId: selectedTemplateId,
         serviceId,
       });
+
       if ("error" in result) {
         toast.error(result.error);
         return;
       }
-      toast.success(
-        `Template loaded (${selectedTemplate?.positionCount ?? 0} positions added)`,
-      );
+
+      toast.success("Template loaded");
       onOpenChange(false);
     });
   }
@@ -288,34 +233,10 @@ export function LoadTemplateDialog({
         <DialogHeader>
           <DialogTitle>Load Template</DialogTitle>
           <DialogDescription>
-            Select a template to apply its position configuration to this
-            service.
+            Select a template to apply to this service. This will replace all
+            existing positions.
           </DialogDescription>
         </DialogHeader>
-
-        {/* Team filter */}
-        <div className="flex flex-col gap-1.5">
-          <Label>Filter by Team</Label>
-          <Select
-            value={filterTeamId}
-            onValueChange={(value) => {
-              setFilterTeamId(value);
-              setSelectedTemplateId(null);
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper" className="max-h-48">
-              <SelectItem value="all">All Teams</SelectItem>
-              {teams.map((team) => (
-                <SelectItem key={team.id} value={team.id}>
-                  {team.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
 
         {/* Template list */}
         <ScrollArea className="max-h-64">
@@ -323,7 +244,7 @@ export function LoadTemplateDialog({
             <div className="flex items-center justify-center py-8">
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
             </div>
-          ) : filteredTemplates.length === 0 ? (
+          ) : templates.length === 0 ? (
             <div className="flex items-center justify-center rounded-lg border border-dashed py-8">
               <p className="text-sm text-muted-foreground">
                 No templates found
@@ -331,7 +252,7 @@ export function LoadTemplateDialog({
             </div>
           ) : (
             <div className="flex flex-col gap-1.5">
-              {filteredTemplates.map((template) => (
+              {templates.map((template) => (
                 <button
                   key={template.id}
                   type="button"
@@ -342,19 +263,16 @@ export function LoadTemplateDialog({
                       : "border-border hover:bg-accent"
                   }`}
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">
                       {template.name}
                     </p>
                     {template.description && (
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className="truncate text-xs text-muted-foreground">
                         {template.description}
                       </p>
                     )}
                     <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                      {template.teamName && (
-                        <span>{template.teamName}</span>
-                      )}
                       <span>{template.positionCount} positions</span>
                       <span>
                         {format(parseISO(template.createdAt), "d MMM yyyy")}
@@ -365,7 +283,7 @@ export function LoadTemplateDialog({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="shrink-0 size-8 p-0"
+                    className="size-8 shrink-0 p-0"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDelete(template.id);
@@ -384,8 +302,7 @@ export function LoadTemplateDialog({
         {/* Warning for existing positions */}
         {hasExistingPositions && selectedTemplate && (
           <p className="rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
-            This will replace existing positions for{" "}
-            {selectedTemplate.teamName ?? "the selected team"}.
+            This will replace all existing positions on this service.
           </p>
         )}
 

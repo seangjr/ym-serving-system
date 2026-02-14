@@ -33,23 +33,33 @@ export const updateServiceTypeSchema = serviceTypeSchema.partial().extend({
 // Service schemas
 // ---------------------------------------------------------------------------
 
+// Helpers: accept both valid values and empty strings from HTML form inputs.
+// Empty strings pass through validation and are cleaned to null server-side.
+const optionalTime = z
+  .union([z.string().regex(TIME_REGEX, "Must be HH:MM format"), z.literal("")])
+  .optional();
+
+const optionalDate = z
+  .union([
+    z.string().regex(DATE_REGEX, "Must be YYYY-MM-DD format"),
+    z.literal(""),
+  ])
+  .optional();
+
+const optionalText = (max: number) =>
+  z.union([z.string().max(max), z.literal("")]).optional();
+
 export const createServiceSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   serviceDate: z.string().regex(DATE_REGEX, "Must be YYYY-MM-DD format"),
   startTime: z.string().regex(TIME_REGEX, "Must be HH:MM format"),
-  endTime: z.string().regex(TIME_REGEX, "Must be HH:MM format").optional(),
+  endTime: optionalTime,
   durationMinutes: z.number().int().min(1).max(480).optional(),
-  serviceTypeId: z.string().uuid().optional(),
-  rehearsalDate: z
-    .string()
-    .regex(DATE_REGEX, "Must be YYYY-MM-DD format")
-    .optional(),
-  rehearsalTime: z
-    .string()
-    .regex(TIME_REGEX, "Must be HH:MM format")
-    .optional(),
-  rehearsalNotes: z.string().max(1000).optional(),
-  notes: z.string().max(2000).optional(),
+  serviceTypeId: z.union([z.string().uuid(), z.literal("")]).optional(),
+  rehearsalDate: optionalDate,
+  rehearsalTime: optionalTime,
+  rehearsalNotes: optionalText(1000),
+  notes: optionalText(2000),
 });
 
 export const updateServiceSchema = createServiceSchema.partial().extend({
@@ -66,9 +76,9 @@ export const createRecurringSchema = z.object({
   endDate: z.string().regex(DATE_REGEX, "Must be YYYY-MM-DD format"),
   dayOfWeek: z.number().int().min(0).max(6).optional(),
   startTime: z.string().regex(TIME_REGEX, "Must be HH:MM format"),
-  endTime: z.string().regex(TIME_REGEX, "Must be HH:MM format").optional(),
+  endTime: optionalTime,
   durationMinutes: z.number().int().min(1).max(480).optional(),
-  serviceTypeId: z.string().uuid().optional(),
+  serviceTypeId: z.union([z.string().uuid(), z.literal("")]).optional(),
   titleTemplate: z.string().min(1, "Title template is required").max(200),
 });
 

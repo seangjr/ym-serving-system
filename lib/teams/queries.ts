@@ -79,7 +79,7 @@ export interface TeamDetailMember {
   full_name: string;
   email: string;
   avatar_url: string | null;
-  phone: string | null;
+  contact_number: string | null;
   skills: {
     position_id: string;
     proficiency: string;
@@ -278,8 +278,7 @@ export async function getTeamDetail(
       team_positions(id, name, category, quantity_needed, sort_order, is_active),
       team_members(
         id, member_id, role, joined_at,
-        members(id, full_name, email),
-        member_profiles(avatar_url, phone)
+        members(id, full_name, email, contact_number, member_profiles(avatar_url))
       )
     `,
     )
@@ -332,11 +331,12 @@ export async function getTeamDetail(
         id: string;
         full_name: string;
         email: string;
+        contact_number: string | null;
+        member_profiles: {
+          avatar_url: string | null;
+        } | null;
       } | null;
-      const profile = tm.member_profiles as {
-        avatar_url: string | null;
-        phone: string | null;
-      } | null;
+      const profile = member?.member_profiles ?? null;
       const memberId = tm.member_id as string;
       return {
         id: tm.id as string,
@@ -346,7 +346,7 @@ export async function getTeamDetail(
         full_name: member?.full_name ?? "Unknown",
         email: member?.email ?? "",
         avatar_url: profile?.avatar_url ?? null,
-        phone: profile?.phone ?? null,
+        contact_number: member?.contact_number ?? null,
         skills: skillsMap[memberId] ?? [],
       };
     },

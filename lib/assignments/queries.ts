@@ -7,6 +7,7 @@ import type {
   TeamForAssignment,
   TemplateDetail,
   TemplateListItem,
+  TemplatePosition,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -54,7 +55,7 @@ export async function getServiceAssignments(
         notes,
         has_conflict,
         assigned_at,
-        members(full_name)
+        members!member_id(full_name)
       )
     `,
     )
@@ -76,19 +77,24 @@ export async function getServiceAssignments(
       color: string | null;
     } | null;
 
-    // service_assignments has UNIQUE on service_position_id, so it's 0 or 1 row
-    const assignmentRows = row.service_assignments as unknown as
-      | {
-          id: string;
-          member_id: string;
-          status: string;
-          notes: string | null;
-          has_conflict: boolean;
-          assigned_at: string;
-          members: { full_name: string } | null;
-        }[]
-      | null;
-    const assignmentRow = assignmentRows?.[0] ?? null;
+    // service_assignments has UNIQUE on service_position_id — Supabase may
+    // return a single object (one-to-one) or an array depending on detection.
+    type AssignmentShape = {
+      id: string;
+      member_id: string;
+      status: string;
+      notes: string | null;
+      has_conflict: boolean;
+      assigned_at: string;
+      members: { full_name: string } | null;
+    };
+    const raw = row.service_assignments as unknown;
+    let assignmentRow: AssignmentShape | null = null;
+    if (Array.isArray(raw)) {
+      assignmentRow = (raw as AssignmentShape[])[0] ?? null;
+    } else if (raw && typeof raw === "object") {
+      assignmentRow = raw as AssignmentShape;
+    }
 
     const position: ServicePositionWithAssignment = {
       id: row.id,
@@ -232,7 +238,20 @@ export async function getEligibleMembers(
     }
   }
 
-  // 5. Map to EligibleMember[]
+  // 5. Fetch position skills for these members
+  const { data: positionSkills } = await supabase
+    .from("member_position_skills")
+    .select("member_id, position_id")
+    .in("member_id", memberIds);
+
+  const positionSkillMap = new Map<string, string[]>();
+  for (const ps of positionSkills ?? []) {
+    const existing = positionSkillMap.get(ps.member_id) ?? [];
+    existing.push(ps.position_id);
+    positionSkillMap.set(ps.member_id, existing);
+  }
+
+  // 6. Map to EligibleMember[]
   return teamMembers.map((tm: Record<string, unknown>) => {
     const memberId = tm.member_id as string;
     const members = tm.members as unknown as {
@@ -245,6 +264,7 @@ export async function getEligibleMembers(
       fullName: members?.full_name ?? "Unknown",
       hasConflict: !!conflict,
       conflictDetails: conflict ?? null,
+      positionIds: positionSkillMap.get(memberId) ?? [],
     };
   });
 }
@@ -377,10 +397,10 @@ export async function getTeamsForAssignment(): Promise<TeamForAssignment[]> {
 }
 
 /**
- * List templates, optionally filtered by team.
+ * List templates, optionally filtered by service type.
  */
 export async function getTemplates(
-  teamId?: string,
+  serviceTypeId?: string,
 ): Promise<TemplateListItem[]> {
   const supabase = await createClient();
 
@@ -391,16 +411,16 @@ export async function getTemplates(
       id,
       name,
       description,
-      team_id,
+      service_type_id,
       positions,
       created_at,
-      serving_teams(name)
+      service_types(label)
     `,
     )
     .order("created_at", { ascending: false });
 
-  if (teamId) {
-    query = query.eq("team_id", teamId);
+  if (serviceTypeId) {
+    query = query.eq("service_type_id", serviceTypeId);
   }
 
   const { data, error } = await query;
@@ -408,16 +428,16 @@ export async function getTemplates(
   if (error) throw error;
 
   return (data ?? []).map((row: Record<string, unknown>) => {
-    const servingTeams = row.serving_teams as unknown as {
-      name: string;
+    const serviceType = row.service_types as unknown as {
+      label: string;
     } | null;
     const positions = row.positions as unknown[];
     return {
       id: row.id as string,
       name: row.name as string,
       description: row.description as string | null,
-      teamId: row.team_id as string | null,
-      teamName: servingTeams?.name ?? null,
+      serviceTypeId: row.service_type_id as string | null,
+      serviceTypeLabel: serviceType?.label ?? null,
       positionCount: Array.isArray(positions) ? positions.length : 0,
       createdAt: row.created_at as string,
     };
@@ -434,7 +454,7 @@ export async function getTemplateById(
 
   const { data, error } = await supabase
     .from("schedule_templates")
-    .select("id, name, description, team_id, positions")
+    .select("id, name, description, service_type_id, positions")
     .eq("id", templateId)
     .maybeSingle();
 
@@ -445,13 +465,7 @@ export async function getTemplateById(
     id: data.id,
     name: data.name,
     description: data.description,
-    teamId: data.team_id,
-    positions:
-      (data.positions as {
-        positionId: string;
-        positionName: string;
-        category: string | null;
-        count: number;
-      }[]) ?? [],
+    serviceTypeId: data.service_type_id,
+    positions: (data.positions as TemplatePosition[]) ?? [],
   };
 }

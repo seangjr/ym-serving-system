@@ -1,9 +1,11 @@
 "use client";
 
-import { Suspense, useActionState, useEffect } from "react";
+import { Suspense, useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
 import { type AuthActionState, login } from "@/lib/auth/actions";
@@ -47,6 +49,15 @@ export default function LoginPage() {
     login,
     {},
   );
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const logoSrc =
+    mounted && resolvedTheme === "dark"
+      ? "/white_ym_logo.png"
+      : "/black_ym_logo.jpg";
 
   return (
     <div className="flex flex-col gap-8">
@@ -55,11 +66,20 @@ export default function LoginPage() {
       </Suspense>
 
       {/* Logo / Title */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight">YM Serving</h1>
-        <p className="text-muted-foreground mt-2 text-sm">
-          Sign in to your account
-        </p>
+      <div className="flex flex-col items-center gap-3 text-center">
+        <Image
+          src={logoSrc}
+          alt="YM Logo"
+          width={48}
+          height={48}
+          className="rounded"
+        />
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">YM Serving Team</h1>
+          <p className="text-muted-foreground mt-2 text-sm">
+            Sign in to your account
+          </p>
+        </div>
       </div>
 
       {/* Form */}

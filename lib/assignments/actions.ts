@@ -10,6 +10,7 @@ import {
   assignMemberSchema,
   deleteTemplateSchema,
   loadTemplateSchema,
+  reorderPositionsSchema,
   removeServicePositionSchema,
   saveTemplateSchema,
   unassignMemberSchema,
@@ -86,6 +87,13 @@ export async function assignMember(
   if (conflicts.length > 0 && !parsed.data.forceAssign) {
     return { conflict: conflicts[0] };
   }
+
+  // Remove any existing assignment for this position slot first (handles
+  // re-assignment and stale rows from previous UI failures)
+  await admin
+    .from("service_assignments")
+    .delete()
+    .eq("service_position_id", parsed.data.servicePositionId);
 
   const { error } = await admin.from("service_assignments").insert({
     service_position_id: parsed.data.servicePositionId,
@@ -279,6 +287,48 @@ export async function removeServicePosition(
 }
 
 // ---------------------------------------------------------------------------
+// Position reordering
+// ---------------------------------------------------------------------------
+
+export async function reorderPositions(
+  data: unknown,
+): Promise<{ success: true } | { error: string }> {
+  const supabase = await createClient();
+  const { role, memberId: callerId } = await getUserRole(supabase);
+
+  const parsed = reorderPositionsSchema.safeParse(data);
+  if (!parsed.success) {
+    return {
+      error: parsed.error.issues[0]?.message ?? "Invalid data.",
+    };
+  }
+
+  // Check that caller can manage at least one position (admin/committee always can)
+  if (!isAdminOrCommittee(role as "admin" | "committee" | "member")) {
+    // For non-admin, verify team lead access
+    if (!callerId) return { error: "Unauthorized." };
+  }
+
+  const admin = createAdminClient();
+
+  // Update sort_order for each position in the new order
+  const updates = parsed.data.positionIds.map((id, index) =>
+    admin
+      .from("service_positions")
+      .update({ sort_order: index })
+      .eq("id", id)
+      .eq("service_id", parsed.data.serviceId),
+  );
+
+  const results = await Promise.all(updates);
+  const failed = results.find((r) => r.error);
+  if (failed?.error) return { error: failed.error.message };
+
+  revalidatePath(`/services/${parsed.data.serviceId}`);
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
 // Template management
 // ---------------------------------------------------------------------------
 
@@ -301,51 +351,53 @@ export async function saveTemplate(
 
   const admin = createAdminClient();
 
-  // Fetch service_positions for this service and team, with position details
+  // Get the service's type
+  const { data: service } = await admin
+    .from("services")
+    .select("service_type_id")
+    .eq("id", parsed.data.serviceId)
+    .single();
+
+  // Fetch ALL service_positions for this service (across all teams)
   const { data: positions, error: posError } = await admin
     .from("service_positions")
-    .select("position_id, team_positions(name, category)")
+    .select(
+      `
+      id,
+      team_id,
+      position_id,
+      sort_order,
+      team_positions(name, category),
+      serving_teams(name)
+    `,
+    )
     .eq("service_id", parsed.data.serviceId)
-    .eq("team_id", parsed.data.teamId);
+    .order("sort_order");
 
   if (posError) return { error: posError.message };
 
-  // Build positions JSON snapshot, grouped by position_id with counts
-  const positionCounts = new Map<
-    string,
-    {
-      positionId: string;
-      positionName: string;
-      category: string | null;
-      count: number;
-    }
-  >();
-
-  for (const pos of positions ?? []) {
+  // Build positions JSON snapshot (positions only, no member assignments)
+  const positionsJson = (positions ?? []).map((pos) => {
     const tp = pos.team_positions as unknown as {
       name: string;
       category: string | null;
     } | null;
-    const key = pos.position_id;
-    const existing = positionCounts.get(key);
-    if (existing) {
-      existing.count += 1;
-    } else {
-      positionCounts.set(key, {
-        positionId: pos.position_id,
-        positionName: tp?.name ?? "Unknown",
-        category: tp?.category ?? null,
-        count: 1,
-      });
-    }
-  }
+    const team = pos.serving_teams as unknown as { name: string } | null;
 
-  const positionsJson = Array.from(positionCounts.values());
+    return {
+      teamId: pos.team_id,
+      teamName: team?.name ?? "Unknown",
+      positionId: pos.position_id,
+      positionName: tp?.name ?? "Unknown",
+      category: tp?.category ?? null,
+      sortOrder: pos.sort_order,
+    };
+  });
 
   const { error } = await admin.from("schedule_templates").insert({
     name: parsed.data.name,
     description: parsed.data.description || null,
-    team_id: parsed.data.teamId,
+    service_type_id: service?.service_type_id ?? null,
     positions: positionsJson,
     created_by: callerId,
   });
@@ -378,7 +430,7 @@ export async function loadTemplate(
   // Fetch template
   const { data: template, error: templateError } = await admin
     .from("schedule_templates")
-    .select("team_id, positions")
+    .select("positions")
     .eq("id", parsed.data.templateId)
     .single();
 
@@ -386,52 +438,38 @@ export async function loadTemplate(
     return { error: "Template not found." };
   }
 
-  const teamId = template.team_id;
-  if (!teamId) return { error: "Template has no team association." };
+  const templatePositions = template.positions as {
+    teamId: string;
+    positionId: string;
+    sortOrder: number;
+  }[];
 
-  // Delete existing positions for this team on this service (replace strategy)
+  // Delete ALL existing positions for this service (replace strategy)
   const { error: deleteError } = await admin
     .from("service_positions")
     .delete()
-    .eq("service_id", parsed.data.serviceId)
-    .eq("team_id", teamId);
+    .eq("service_id", parsed.data.serviceId);
 
   if (deleteError) return { error: deleteError.message };
 
+  if (templatePositions.length === 0) {
+    revalidatePath(`/services/${parsed.data.serviceId}`);
+    return { success: true };
+  }
+
   // Insert new positions from template
-  const templatePositions = template.positions as {
-    positionId: string;
-    positionName: string;
-    category: string | null;
-    count: number;
-  }[];
+  const insertRows = templatePositions.map((pos) => ({
+    service_id: parsed.data.serviceId,
+    team_id: pos.teamId,
+    position_id: pos.positionId,
+    sort_order: pos.sortOrder,
+  }));
 
-  const insertRows: {
-    service_id: string;
-    team_id: string;
-    position_id: string;
-    sort_order: number;
-  }[] = [];
+  const { error: insertError } = await admin
+    .from("service_positions")
+    .insert(insertRows);
 
-  let sortOrder = 0;
-  for (const pos of templatePositions) {
-    for (let i = 0; i < pos.count; i++) {
-      insertRows.push({
-        service_id: parsed.data.serviceId,
-        team_id: teamId,
-        position_id: pos.positionId,
-        sort_order: sortOrder++,
-      });
-    }
-  }
-
-  if (insertRows.length > 0) {
-    const { error: insertError } = await admin
-      .from("service_positions")
-      .insert(insertRows);
-
-    if (insertError) return { error: insertError.message };
-  }
+  if (insertError) return { error: insertError.message };
 
   revalidatePath(`/services/${parsed.data.serviceId}`);
   return { success: true };
@@ -469,6 +507,6 @@ export async function deleteTemplate(
 // Template fetching (server action wrapper for client components)
 // ---------------------------------------------------------------------------
 
-export async function fetchTemplates(teamId?: string) {
-  return getTemplates(teamId);
+export async function fetchTemplates(serviceTypeId?: string) {
+  return getTemplates(serviceTypeId);
 }

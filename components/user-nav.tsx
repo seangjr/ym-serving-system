@@ -19,8 +19,8 @@ export function UserNav({ user }: UserNavProps) {
   };
 
   return (
-    <div className="flex flex-col gap-2 px-1">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-2 px-1 group-data-[collapsible=icon]:px-0">
+      <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
         <span className="truncate text-sm text-muted-foreground">
           {user.email}
         </span>
@@ -31,11 +31,11 @@ export function UserNav({ user }: UserNavProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-full justify-start gap-2 text-muted-foreground"
+        className="h-8 w-full justify-start gap-2 text-muted-foreground group-data-[collapsible=icon]:justify-center"
         onClick={handleSignOut}
       >
-        <LogOut className="size-4" />
-        Sign out
+        <LogOut className="size-4 shrink-0" />
+        <span className="group-data-[collapsible=icon]:hidden">Sign out</span>
       </Button>
     </div>
   );

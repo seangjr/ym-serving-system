@@ -9,10 +9,10 @@ export interface OwnProfile {
   id: string;
   full_name: string;
   email: string;
-  phone: string | null;
+  contact_number: string | null;
   emergency_contact_name: string | null;
-  emergency_contact_phone: string | null;
-  birthdate: string | null;
+  emergency_contact_number: string | null;
+  date_of_birth: string | null;
   created_at: string;
   member_profiles: {
     avatar_url: string | null;
@@ -28,10 +28,10 @@ export interface MemberProfile {
   id: string;
   full_name: string;
   email: string;
-  phone: string | null;
+  contact_number: string | null;
   emergency_contact_name: string | null;
-  emergency_contact_phone: string | null;
-  birthdate: string | null;
+  emergency_contact_number: string | null;
+  date_of_birth: string | null;
   member_profiles: {
     avatar_url: string | null;
     joined_serving_at: string | null;
@@ -71,9 +71,9 @@ export interface TeamMemberProfile {
     id: string;
     full_name: string;
     email: string;
+    contact_number: string | null;
   };
   member_profiles: {
-    phone: string | null;
     avatar_url: string | null;
   } | null;
   member_position_skills: {
@@ -108,10 +108,10 @@ export async function getOwnProfile(): Promise<OwnProfile | null> {
       id,
       full_name,
       email,
-      phone,
+      contact_number,
       emergency_contact_name,
-      emergency_contact_phone,
-      birthdate,
+      emergency_contact_number,
+      date_of_birth,
       created_at,
       member_profiles(
         avatar_url,
@@ -150,10 +150,10 @@ export async function getMemberProfile(
       id,
       full_name,
       email,
-      phone,
+      contact_number,
       emergency_contact_name,
-      emergency_contact_phone,
-      birthdate,
+      emergency_contact_number,
+      date_of_birth,
       member_profiles(
         avatar_url,
         joined_serving_at,
@@ -264,10 +264,10 @@ export async function getMembersByTeam(
       members(
         id,
         full_name,
-        email
+        email,
+        contact_number
       ),
       member_profiles:member_id(
-        phone,
         avatar_url
       ),
       member_position_skills:member_id(

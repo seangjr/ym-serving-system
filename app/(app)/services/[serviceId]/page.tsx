@@ -119,7 +119,7 @@ export default async function ServiceDetailPage({
             }}
             serviceTypes={serviceTypesList}
             teams={allTeams.map((t) => ({ id: t.id, name: t.name }))}
-            teamsWithPositions={teamIdsWithPositions}
+            hasExistingPositions={teamIdsWithPositions.length > 0}
           />
         )}
       </div>

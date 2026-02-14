@@ -40,6 +40,8 @@ export interface EligibleMember {
     serviceTime: string;
     positionName: string;
   } | null;
+  /** Position IDs this member has skills for (from member_position_skills). */
+  positionIds: string[];
 }
 
 /** Conflict details for the confirmation dialog. */
@@ -71,10 +73,20 @@ export interface TemplateListItem {
   id: string;
   name: string;
   description: string | null;
-  teamId: string | null;
-  teamName: string | null;
+  serviceTypeId: string | null;
+  serviceTypeLabel: string | null;
   positionCount: number;
   createdAt: string;
+}
+
+/** A position entry stored in a template (positions only, no member assignments). */
+export interface TemplatePosition {
+  teamId: string;
+  teamName: string;
+  positionId: string;
+  positionName: string;
+  category: string | null;
+  sortOrder: number;
 }
 
 /** Full template detail for loading. */
@@ -82,11 +94,6 @@ export interface TemplateDetail {
   id: string;
   name: string;
   description: string | null;
-  teamId: string | null;
-  positions: {
-    positionId: string;
-    positionName: string;
-    category: string | null;
-    count: number;
-  }[];
+  serviceTypeId: string | null;
+  positions: TemplatePosition[];
 }

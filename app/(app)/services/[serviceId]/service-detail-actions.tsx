@@ -49,7 +49,7 @@ interface ServiceDetailActionsProps {
   service: ServiceForActions;
   serviceTypes: { id: string; name: string; label: string; color: string }[];
   teams: TeamOption[];
-  teamsWithPositions: string[];
+  hasExistingPositions: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -60,7 +60,7 @@ export function ServiceDetailActions({
   service,
   serviceTypes,
   teams,
-  teamsWithPositions,
+  hasExistingPositions,
 }: ServiceDetailActionsProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -185,7 +185,6 @@ export function ServiceDetailActions({
         open={saveTemplateOpen}
         onOpenChange={setSaveTemplateOpen}
         serviceId={service.id}
-        teams={teams}
       />
 
       {/* Load template dialog */}
@@ -193,8 +192,8 @@ export function ServiceDetailActions({
         open={loadTemplateOpen}
         onOpenChange={setLoadTemplateOpen}
         serviceId={service.id}
-        teams={teams}
-        teamsWithPositions={teamsWithPositions}
+        serviceTypeId={service.serviceTypeId ?? null}
+        hasExistingPositions={hasExistingPositions}
       />
     </>
   );

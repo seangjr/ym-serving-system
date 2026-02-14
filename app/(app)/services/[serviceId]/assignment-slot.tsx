@@ -85,7 +85,7 @@ export function AssignmentSlot({
     memberId: string;
     memberName: string;
   } | null>(null);
-  const [showNotes, setShowNotes] = useState(false);
+  const [showNotes, setShowNotes] = useState(!!position.assignment?.notes);
   const [noteValue, setNoteValue] = useState(position.assignment?.notes ?? "");
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const noteTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
@@ -325,11 +325,11 @@ export function AssignmentSlot({
 
         {/* Notes input (shown when toggled) */}
         {showNotes && canManage && (
-          <div className="ml-4 mt-1 mb-1">
+          <div className="ml-4 mt-1 mb-1 flex items-center gap-1">
             <input
               type="text"
               placeholder="Add a note..."
-              className="w-full rounded-md border border-input bg-transparent px-2 py-1 text-xs shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="flex-1 rounded-md border border-input bg-transparent px-2 py-1 text-xs shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               value={noteValue}
               onChange={(e) => {
                 setNoteValue(e.target.value);
@@ -337,6 +337,15 @@ export function AssignmentSlot({
               }}
               onBlur={() => handleNoteSave(noteValue)}
             />
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => setShowNotes(false)}
+              title="Close notes"
+              className="shrink-0 text-muted-foreground"
+            >
+              <X className="size-3" />
+            </Button>
           </div>
         )}
 
@@ -394,16 +403,20 @@ export function AssignmentSlot({
           {canManage && (
             <>
               {/* Combobox to assign */}
-              <Combobox<{ value: string; label: string; hasConflict: boolean }>
+              <Combobox<string>
                 open={comboboxOpen}
                 onOpenChange={setComboboxOpen}
                 value={null}
                 onValueChange={(val) => {
                   if (val) {
-                    handleAssign(val.value);
+                    handleAssign(val);
                     setComboboxOpen(false);
                   }
                 }}
+                itemToStringLabel={(memberId) =>
+                  eligibleMembers.find((m) => m.id === memberId)
+                    ?.fullName ?? ""
+                }
               >
                 <ComboboxInput
                   placeholder="Search members..."
@@ -413,14 +426,7 @@ export function AssignmentSlot({
                 <ComboboxContent>
                   <ComboboxList>
                     {eligibleMembers.map((member) => (
-                      <ComboboxItem
-                        key={member.id}
-                        value={{
-                          value: member.id,
-                          label: member.fullName,
-                          hasConflict: member.hasConflict,
-                        }}
-                      >
+                      <ComboboxItem key={member.id} value={member.id}>
                         <span className="flex items-center gap-1.5">
                           {member.fullName}
                           {member.hasConflict && (

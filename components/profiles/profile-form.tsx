@@ -32,10 +32,10 @@ interface ProfileFormProps {
   initialData: {
     full_name: string;
     email: string;
-    phone: string;
+    contact_number: string;
     emergency_contact_name: string;
-    emergency_contact_phone: string;
-    birthdate: string;
+    emergency_contact_number: string;
+    date_of_birth: string;
   };
   memberId: string;
 }
@@ -46,10 +46,10 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   const form = useForm<UpdateProfileInput>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
-      phone: initialData.phone,
+      contact_number: initialData.contact_number,
       emergency_contact_name: initialData.emergency_contact_name,
-      emergency_contact_phone: initialData.emergency_contact_phone,
-      birthdate: initialData.birthdate,
+      emergency_contact_number: initialData.emergency_contact_number,
+      date_of_birth: initialData.date_of_birth,
     },
   });
 
@@ -96,7 +96,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 
             <FormField
               control={form.control}
-              name="phone"
+              name="contact_number"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone</FormLabel>
@@ -131,7 +131,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 
             <FormField
               control={form.control}
-              name="emergency_contact_phone"
+              name="emergency_contact_number"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Emergency Contact Phone</FormLabel>
@@ -149,7 +149,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 
             <FormField
               control={form.control}
-              name="birthdate"
+              name="date_of_birth"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Birthdate</FormLabel>
