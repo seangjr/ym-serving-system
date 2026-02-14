@@ -1,12 +1,11 @@
 "use client";
 
-import * as React from "react";
 import { isSameDay, parseISO } from "date-fns";
+import * as React from "react";
 import type { DayButton } from "react-day-picker";
-
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -61,7 +60,7 @@ function ServiceDayButton({
       ref={ref}
       variant="ghost"
       size="icon"
-      data-day={day.date.toLocaleDateString()}
+      data-day={day.date.toISOString().slice(0, 10)}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&
@@ -79,11 +78,11 @@ function ServiceDayButton({
     >
       {props.children}
       {dotsToShow.length > 0 && (
-        <span className="flex items-center justify-center gap-0.5">
+        <span className="flex items-center justify-center gap-1">
           {dotsToShow.map((s) => (
             <span
               key={s.id}
-              className="size-1.5 rounded-full"
+              className="size-2 rounded-full ring-1 ring-white/50"
               style={{ backgroundColor: s.color }}
             />
           ))}

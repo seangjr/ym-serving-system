@@ -72,15 +72,10 @@ export default async function DashboardPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Services</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage upcoming services and team assignments
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold tracking-tight">Services</h1>
         {isAdminOrCommittee(role) && (
           <DashboardActions
             serviceTypes={serviceTypesList}
@@ -101,14 +96,14 @@ export default async function DashboardPage() {
       <ServiceStats stats={stats} />
 
       {/* Main content: Calendar + Upcoming list */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
         {/* Calendar: 3 of 5 cols on desktop */}
         <div className="lg:col-span-3">
-          <Card>
-            <CardHeader>
-              <CardTitle>Calendar</CardTitle>
+          <Card className="gap-3 py-4">
+            <CardHeader className="px-4">
+              <CardTitle className="text-sm">Calendar</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4">
               <DashboardCalendar services={calendarServices} />
             </CardContent>
           </Card>
@@ -116,11 +111,11 @@ export default async function DashboardPage() {
 
         {/* Upcoming list: 2 of 5 cols on desktop */}
         <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Upcoming Services</CardTitle>
+          <Card className="gap-3 py-4">
+            <CardHeader className="px-4">
+              <CardTitle className="text-sm">Upcoming Services</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4">
               <ServiceList
                 services={upcomingList}
                 userRole={role}

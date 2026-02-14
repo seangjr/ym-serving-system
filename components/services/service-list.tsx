@@ -1,10 +1,11 @@
 "use client";
 
 import { format, parseISO } from "date-fns";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Copy, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { DuplicateServiceDialog } from "@/components/services/duplicate-service-dialog";
 import { ServiceFormDialog } from "@/components/services/service-form-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,8 @@ export function ServiceList({
 }: ServiceListProps) {
   const [editingService, setEditingService] =
     useState<ServiceListService | null>(null);
+  const [duplicatingService, setDuplicatingService] =
+    useState<ServiceListService | null>(null);
   const [isPending, startTransition] = useTransition();
   const canManage = isAdminOrCommittee(userRole);
 
@@ -83,7 +86,7 @@ export function ServiceList({
           >
             <Link
               href={`/services/${service.id}`}
-              className="absolute inset-0 z-0"
+              className="absolute inset-0 z-10"
             >
               <span className="sr-only">View {service.title}</span>
             </Link>
@@ -121,9 +124,7 @@ export function ServiceList({
                 </Badge>
               )}
 
-              <p className="mt-1 text-[10px] text-muted-foreground/70">
-                Assignments: Coming in Phase 4
-              </p>
+              {/* Assignment counts will be added in a future update */}
             </div>
 
             {canManage && (
@@ -132,7 +133,7 @@ export function ServiceList({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="relative z-10 size-7 shrink-0 opacity-0 group-hover:opacity-100"
+                    className="relative z-20 size-7 shrink-0 opacity-0 group-hover:opacity-100"
                     disabled={isPending}
                   >
                     <MoreHorizontal className="size-4" />
@@ -143,6 +144,12 @@ export function ServiceList({
                   <DropdownMenuItem onSelect={() => setEditingService(service)}>
                     <Pencil />
                     Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => setDuplicatingService(service)}
+                  >
+                    <Copy />
+                    Duplicate
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     variant="destructive"
@@ -173,6 +180,21 @@ export function ServiceList({
             startTime: editingService.startTime,
             endTime: editingService.endTime,
             serviceTypeId: editingService.serviceType?.id,
+          }}
+        />
+      )}
+
+      {/* Duplicate dialog */}
+      {duplicatingService && (
+        <DuplicateServiceDialog
+          open={!!duplicatingService}
+          onOpenChange={(open) => {
+            if (!open) setDuplicatingService(null);
+          }}
+          sourceService={{
+            id: duplicatingService.id,
+            title: duplicatingService.title,
+            serviceDate: duplicatingService.serviceDate,
           }}
         />
       )}

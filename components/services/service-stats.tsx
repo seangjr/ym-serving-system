@@ -20,53 +20,43 @@ interface ServiceStatsProps {
 
 export function ServiceStats({ stats }: ServiceStatsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-3 gap-3">
       {/* Upcoming Services */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">
-            Upcoming Services
+      <Card className="gap-1 py-3">
+        <CardHeader className="flex flex-row items-center justify-between px-4 pb-0">
+          <CardTitle className="text-xs font-medium text-muted-foreground">
+            Upcoming
           </CardTitle>
-          <CalendarCheck className="size-4 text-muted-foreground" />
+          <CalendarCheck className="size-3.5 text-muted-foreground" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.upcomingCount}</div>
+        <CardContent className="px-4">
+          <div className="text-xl font-bold">{stats.upcomingCount}</div>
         </CardContent>
       </Card>
 
       {/* Unassigned Positions */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">
-            Unassigned Positions
+      <Card className="gap-1 py-3">
+        <CardHeader className="flex flex-row items-center justify-between px-4 pb-0">
+          <CardTitle className="text-xs font-medium text-muted-foreground">
+            Unassigned
           </CardTitle>
-          <Users className="size-4 text-muted-foreground" />
+          <Users className="size-3.5 text-muted-foreground" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.unassignedPositions}</div>
-          <p className="text-xs text-muted-foreground">
-            {stats.unassignedPositions === 0
-              ? "All positions filled"
-              : "Positions needing members"}
-          </p>
+        <CardContent className="px-4">
+          <div className="text-xl font-bold">{stats.unassignedPositions}</div>
         </CardContent>
       </Card>
 
       {/* Pending Confirmations */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">
-            Pending Confirmations
+      <Card className="gap-1 py-3">
+        <CardHeader className="flex flex-row items-center justify-between px-4 pb-0">
+          <CardTitle className="text-xs font-medium text-muted-foreground">
+            Pending
           </CardTitle>
-          <Clock className="size-4 text-muted-foreground" />
+          <Clock className="size-3.5 text-muted-foreground" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.pendingConfirmations}</div>
-          <p className="text-xs text-muted-foreground">
-            {stats.pendingConfirmations === 0
-              ? "No pending responses"
-              : "Awaiting member responses"}
-          </p>
+        <CardContent className="px-4">
+          <div className="text-xl font-bold">{stats.pendingConfirmations}</div>
         </CardContent>
       </Card>
     </div>

@@ -87,7 +87,6 @@ export function ServiceFormDialog({
           serviceDate: editService.serviceDate,
           startTime: editService.startTime,
           endTime: editService.endTime ?? undefined,
-          durationMinutes: editService.durationMinutes ?? undefined,
           serviceTypeId: editService.serviceTypeId ?? undefined,
           rehearsalDate: editService.rehearsalDate ?? undefined,
           rehearsalTime: editService.rehearsalTime ?? undefined,
@@ -112,7 +111,6 @@ export function ServiceFormDialog({
               serviceDate: editService.serviceDate,
               startTime: editService.startTime,
               endTime: editService.endTime ?? undefined,
-              durationMinutes: editService.durationMinutes ?? undefined,
               serviceTypeId: editService.serviceTypeId ?? undefined,
               rehearsalDate: editService.rehearsalDate ?? undefined,
               rehearsalTime: editService.rehearsalTime ?? undefined,
@@ -190,10 +188,7 @@ export function ServiceFormDialog({
             {/* Service Date */}
             <div className="flex flex-col gap-2">
               <Label>Service Date</Label>
-              <Popover
-                open={serviceDateOpen}
-                onOpenChange={setServiceDateOpen}
-              >
+              <Popover open={serviceDateOpen} onOpenChange={setServiceDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
@@ -210,9 +205,7 @@ export function ServiceFormDialog({
                   <Calendar
                     mode="single"
                     selected={
-                      serviceDateValue
-                        ? parseISO(serviceDateValue)
-                        : undefined
+                      serviceDateValue ? parseISO(serviceDateValue) : undefined
                     }
                     onSelect={(date) => {
                       if (date) {
@@ -283,25 +276,7 @@ export function ServiceFormDialog({
             {/* End Time */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="svc-end">End Time</Label>
-              <Input
-                id="svc-end"
-                type="time"
-                {...form.register("endTime")}
-              />
-            </div>
-
-            {/* Duration */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="svc-duration">Duration (minutes)</Label>
-              <Input
-                id="svc-duration"
-                type="number"
-                placeholder="e.g. 90"
-                {...form.register("durationMinutes", { valueAsNumber: true })}
-              />
-              <p className="text-xs text-muted-foreground">
-                Optional. Used if end time is not set.
-              </p>
+              <Input id="svc-end" type="time" {...form.register("endTime")} />
             </div>
           </div>
 

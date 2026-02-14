@@ -98,17 +98,22 @@ export function ServiceTypeManager({ serviceTypes }: ServiceTypeManagerProps) {
 
 function AddTypeForm({ onComplete }: { onComplete: () => void }) {
   const [isPending, startTransition] = useTransition();
-  const [name, setName] = useState("");
   const [label, setLabel] = useState("");
   const [color, setColor] = useState("#6366f1");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !label.trim()) return;
+    if (!label.trim()) return;
+
+    const name = label
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
 
     startTransition(async () => {
       const result = await createServiceType({
-        name: name.trim(),
+        name,
         label: label.trim(),
         color,
       });
@@ -119,7 +124,6 @@ function AddTypeForm({ onComplete }: { onComplete: () => void }) {
       }
 
       toast.success(`Service type "${label}" added`);
-      setName("");
       setLabel("");
       setColor("#6366f1");
       onComplete();
@@ -131,19 +135,7 @@ function AddTypeForm({ onComplete }: { onComplete: () => void }) {
       onSubmit={handleSubmit}
       className="flex flex-col gap-3 rounded-lg border bg-muted/50 p-4"
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="st-name" className="text-xs">
-            Name (slug)
-          </Label>
-          <Input
-            id="st-name"
-            placeholder="e.g. sunday-morning"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="st-label" className="text-xs">
             Label
@@ -158,7 +150,7 @@ function AddTypeForm({ onComplete }: { onComplete: () => void }) {
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="st-color" className="text-xs">
-            Color
+            Colour
           </Label>
           <div className="flex items-center gap-2">
             <span
@@ -179,11 +171,7 @@ function AddTypeForm({ onComplete }: { onComplete: () => void }) {
         <Button type="button" variant="ghost" size="sm" onClick={onComplete}>
           Cancel
         </Button>
-        <Button
-          type="submit"
-          size="sm"
-          disabled={isPending || !name.trim() || !label.trim()}
-        >
+        <Button type="submit" size="sm" disabled={isPending || !label.trim()}>
           {isPending && <Loader2 className="animate-spin" />}
           Add Type
         </Button>
@@ -235,9 +223,6 @@ function TypeRow({
         />
         <div className="min-w-0">
           <p className="text-sm font-medium truncate">{serviceType.label}</p>
-          <p className="text-xs text-muted-foreground truncate">
-            {serviceType.name}
-          </p>
         </div>
       </div>
 
@@ -288,18 +273,23 @@ function EditTypeForm({
   onClose: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
-  const [name, setName] = useState(serviceType.name);
   const [label, setLabel] = useState(serviceType.label);
   const [color, setColor] = useState(serviceType.color);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !label.trim()) return;
+    if (!label.trim()) return;
+
+    const name = label
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
 
     startTransition(async () => {
       const result = await updateServiceType({
         id: serviceType.id,
-        name: name.trim(),
+        name,
         label: label.trim(),
         color,
       });
@@ -319,41 +309,49 @@ function EditTypeForm({
       onSubmit={handleSubmit}
       className="flex flex-col gap-3 rounded-lg border bg-muted/50 p-3"
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Input
-          placeholder="Name (slug)"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <Input
-          placeholder="Label"
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          required
-        />
-        <div className="flex items-center gap-2">
-          <span
-            className="size-6 shrink-0 rounded border"
-            style={{ backgroundColor: color }}
-          />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <Label
+            htmlFor={`st-edit-label-${serviceType.id}`}
+            className="text-xs"
+          >
+            Label
+          </Label>
           <Input
-            placeholder="#6366f1"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
+            id={`st-edit-label-${serviceType.id}`}
+            placeholder="Label"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
             required
           />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label
+            htmlFor={`st-edit-color-${serviceType.id}`}
+            className="text-xs"
+          >
+            Colour
+          </Label>
+          <div className="flex items-center gap-2">
+            <span
+              className="size-6 shrink-0 rounded border"
+              style={{ backgroundColor: color }}
+            />
+            <Input
+              id={`st-edit-color-${serviceType.id}`}
+              placeholder="#6366f1"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              required
+            />
+          </div>
         </div>
       </div>
       <div className="flex items-center justify-end gap-2">
         <Button type="button" variant="ghost" size="sm" onClick={onClose}>
           Cancel
         </Button>
-        <Button
-          type="submit"
-          size="sm"
-          disabled={isPending || !name.trim() || !label.trim()}
-        >
+        <Button type="submit" size="sm" disabled={isPending || !label.trim()}>
           {isPending && <Loader2 className="animate-spin" />}
           Save
         </Button>

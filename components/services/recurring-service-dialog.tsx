@@ -208,9 +208,13 @@ export function RecurringServiceDialog({
                     : ""
                 }
                 onValueChange={(value) =>
-                  form.setValue("dayOfWeek", value ? Number(value) : undefined, {
-                    shouldValidate: true,
-                  })
+                  form.setValue(
+                    "dayOfWeek",
+                    value ? Number(value) : undefined,
+                    {
+                      shouldValidate: true,
+                    },
+                  )
                 }
               >
                 <SelectTrigger className="w-full">
@@ -218,7 +222,7 @@ export function RecurringServiceDialog({
                 </SelectTrigger>
                 <SelectContent position="popper" className="max-h-48">
                   {DAY_LABELS.map((label, i) => (
-                    <SelectItem key={i} value={String(i)}>
+                    <SelectItem key={label} value={String(i)}>
                       {label}
                     </SelectItem>
                   ))}
@@ -253,11 +257,9 @@ export function RecurringServiceDialog({
                     }
                     onSelect={(date) => {
                       if (date) {
-                        form.setValue(
-                          "startDate",
-                          format(date, "yyyy-MM-dd"),
-                          { shouldValidate: true },
-                        );
+                        form.setValue("startDate", format(date, "yyyy-MM-dd"), {
+                          shouldValidate: true,
+                        });
                       }
                       setStartDateOpen(false);
                     }}
@@ -290,9 +292,7 @@ export function RecurringServiceDialog({
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={
-                      endDateValue ? parseISO(endDateValue) : undefined
-                    }
+                    selected={endDateValue ? parseISO(endDateValue) : undefined}
                     onSelect={(date) => {
                       if (date) {
                         form.setValue("endDate", format(date, "yyyy-MM-dd"), {
@@ -334,17 +334,6 @@ export function RecurringServiceDialog({
                 id="rec-end-time"
                 type="time"
                 {...form.register("endTime")}
-              />
-            </div>
-
-            {/* Duration */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="rec-duration">Duration (minutes)</Label>
-              <Input
-                id="rec-duration"
-                type="number"
-                placeholder="e.g. 90"
-                {...form.register("durationMinutes", { valueAsNumber: true })}
               />
             </div>
 
@@ -413,7 +402,8 @@ export function RecurringServiceDialog({
               disabled={isPending || previewCount === 0 || previewCount > 52}
             >
               {isPending && <Loader2 className="animate-spin" />}
-              Create {previewCount > 0 ? `${previewCount} Services` : "Services"}
+              Create{" "}
+              {previewCount > 0 ? `${previewCount} Services` : "Services"}
             </Button>
           </DialogFooter>
         </form>
