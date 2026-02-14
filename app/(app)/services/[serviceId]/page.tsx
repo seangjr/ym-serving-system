@@ -1,13 +1,20 @@
 import { format, parseISO } from "date-fns";
-import { ArrowLeft, Clock, FileText, Music } from "lucide-react";
+import { ArrowLeft, FileText, Music, Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  getEligibleMembers,
+  getServiceAssignments,
+  getTeamsForAssignment,
+} from "@/lib/assignments/queries";
 import { getUserRole, isAdminOrCommittee } from "@/lib/auth/roles";
 import { getServiceById, getServiceTypes } from "@/lib/services/queries";
 import { createClient } from "@/lib/supabase/server";
+import { AssignmentPanel } from "./assignment-panel";
+import { PositionAdder } from "./position-adder";
 import { ServiceDetailActions } from "./service-detail-actions";
 
 // ---------------------------------------------------------------------------
@@ -22,15 +29,30 @@ export default async function ServiceDetailPage({
   const { serviceId } = await params;
 
   const supabase = await createClient();
-  const [{ role }, service, serviceTypes] = await Promise.all([
-    getUserRole(supabase),
-    getServiceById(serviceId),
-    getServiceTypes(),
-  ]);
+  const [{ role }, service, serviceTypes, assignmentGroups, allTeams] =
+    await Promise.all([
+      getUserRole(supabase),
+      getServiceById(serviceId),
+      getServiceTypes(),
+      getServiceAssignments(serviceId),
+      getTeamsForAssignment(),
+    ]);
 
   if (!service) notFound();
 
   const canManage = isAdminOrCommittee(role);
+
+  // Fetch eligible members (with conflict info) for each team that has positions
+  const teamIdsWithPositions = [
+    ...new Set(assignmentGroups.map((g) => g.teamId)),
+  ];
+  const eligibleMembersEntries = await Promise.all(
+    teamIdsWithPositions.map(async (teamId) => {
+      const members = await getEligibleMembers(teamId, serviceId);
+      return [teamId, members] as const;
+    }),
+  );
+  const eligibleMembersMap = Object.fromEntries(eligibleMembersEntries);
 
   const formattedDate = format(
     parseISO(service.service_date),
@@ -216,23 +238,27 @@ export default async function ServiceDetailPage({
         </Card>
       </div>
 
-      {/* Assignments placeholder for Phase 4 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="size-4" />
-            Assignments
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center rounded-lg border border-dashed p-8">
-            <p className="text-sm text-muted-foreground">
-              Team assignments will be available after Phase 4 (Scheduling &
-              Assignments).
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Assignment panel */}
+      <div className="flex flex-col gap-4">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <Users className="size-5" />
+          Assignments
+        </h2>
+
+        <AssignmentPanel
+          teams={assignmentGroups}
+          serviceId={serviceId}
+          serviceDate={service.service_date}
+          startTime={service.start_time}
+          endTime={service.end_time}
+          durationMinutes={service.duration_minutes}
+          canManage={canManage}
+          allTeams={allTeams}
+          eligibleMembersMap={eligibleMembersMap}
+        />
+
+        {canManage && <PositionAdder serviceId={serviceId} teams={allTeams} />}
+      </div>
     </div>
   );
 }

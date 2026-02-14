@@ -50,6 +50,22 @@ export interface ConflictInfo {
   positionName: string;
 }
 
+/** Team data for the assignment page (position adder + eligible members). */
+export interface TeamForAssignment {
+  id: string;
+  name: string;
+  color: string | null;
+  positions: {
+    id: string;
+    name: string;
+    category: string | null;
+  }[];
+  members: {
+    id: string;
+    fullName: string;
+  }[];
+}
+
 /** Template list item for browsing. */
 export interface TemplateListItem {
   id: string;

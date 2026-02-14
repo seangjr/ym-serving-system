@@ -4,6 +4,7 @@ import type {
   EligibleMember,
   ServicePositionWithAssignment,
   TeamAssignmentGroup,
+  TeamForAssignment,
   TemplateDetail,
   TemplateListItem,
 } from "./types";
@@ -323,6 +324,56 @@ export async function getMemberConflicts(
         positionName: sp.team_positions?.name ?? "Unknown",
       };
     });
+}
+
+/**
+ * Get all active teams with their positions and members.
+ * Used for the assignment page (position adder dropdown + eligible members).
+ */
+export async function getTeamsForAssignment(): Promise<TeamForAssignment[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("serving_teams")
+    .select(
+      `
+      id,
+      name,
+      color,
+      team_positions(id, name, category),
+      team_members(
+        member_id,
+        members(id, full_name)
+      )
+    `,
+    )
+    .eq("is_active", true)
+    .order("sort_order")
+    .order("name");
+
+  if (error) throw error;
+
+  return (data ?? []).map((team: Record<string, unknown>) => {
+    const positions = (team.team_positions ?? []) as {
+      id: string;
+      name: string;
+      category: string | null;
+    }[];
+    const teamMembers = (team.team_members ?? []) as {
+      member_id: string;
+      members: { id: string; full_name: string } | null;
+    }[];
+    return {
+      id: team.id as string,
+      name: team.name as string,
+      color: team.color as string | null,
+      positions,
+      members: teamMembers.map((tm) => ({
+        id: tm.member_id,
+        fullName: tm.members?.full_name ?? "Unknown",
+      })),
+    };
+  });
 }
 
 /**
