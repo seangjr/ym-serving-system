@@ -14,6 +14,7 @@ import type {
   TeamForAssignment,
 } from "@/lib/assignments/types";
 import { AssignmentSlot } from "./assignment-slot";
+import { InlinePositionAdder } from "./position-adder";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -114,6 +115,9 @@ export function AssignmentPanel({
                   </CollapsibleContent>
                 </Collapsible>
               ))}
+              {canManage && teamData && (
+                <InlinePositionAdder serviceId={serviceId} team={teamData} />
+              )}
             </CardContent>
           </Card>
         );
