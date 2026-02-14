@@ -92,14 +92,12 @@ Plans:
   3. Assignments are grouped by position category (vocals, instruments, production) with collapsible sections, and positions can be added/removed from a service
   4. System detects and prominently warns when a member is assigned to overlapping services on the same day
   5. Admin can save a team configuration as a reusable template and load it when setting up a new service
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Assignments database schema with state machine and RLS policies
-- [ ] 04-02: Service detail view with assignment UI grouped by position category
-- [ ] 04-03: Assignment logic (smart dropdown, notes, add/remove positions)
-- [ ] 04-04: Conflict detection and warning display
-- [ ] 04-05: Service templates (save and load team configurations)
+- [ ] 04-01-PLAN.md -- Database schema (service_positions, service_assignments, schedule_templates) + lib/assignments module (schemas, types, queries, server actions)
+- [ ] 04-02-PLAN.md -- Assignment UI on service detail page: combobox-per-slot, conflict detection/confirmation dialog, position grouping by team/category, inline position add/remove
+- [ ] 04-03-PLAN.md -- Template save/load workflow + dashboard stats integration (real unassigned/pending counts)
 
 ### Phase 5: Availability Management
 **Goal**: Members can manage their availability, and the scheduling system surfaces conflicts when assigning unavailable members
@@ -215,7 +213,7 @@ Note: Phases 3, 7, 8, 9 depend only on Phase 1 and can be parallelized after Pha
 | 1. Foundation & Authentication | 5/5 | ✓ Complete | 2026-02-13 |
 | 2. Teams & Member Profiles | 4/4 | ✓ Complete | 2026-02-13 |
 | 3. Services & Calendar | 3/3 | ✓ Complete | 2026-02-14 |
-| 4. Scheduling & Assignments | 0/5 | Not started | - |
+| 4. Scheduling & Assignments | 0/3 | Not started | - |
 | 5. Availability Management | 0/3 | Not started | - |
 | 6. Accept/Decline & Notifications | 0/5 | Not started | - |
 | 7. Song Library & Setlists | 0/3 | Not started | - |
