@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Team leaders can schedule members to positions for upcoming services, and team members can see their assignments, confirm/decline, and manage their availability.
-**Current focus:** Phase 2 - Teams & Member Profiles
+**Current focus:** Phase 3 - Services & Calendar
 
 ## Current Position
 
-Phase: 2 of 10 (Teams & Member Profiles) -- COMPLETE
-Plan: 7 of 7 completed in current phase (4 original + 3 gap closure)
-Status: Phase Complete
-Last activity: 2026-02-13 -- Completed 02-06 teams UX gap closure (responsive roster table, Assign Positions dialog, remove quantity field)
+Phase: 3 of 10 (Services & Calendar)
+Plan: 1 of 3 completed in current phase
+Status: In Progress
+Last activity: 2026-02-14 -- Completed 03-01 services data foundation (3 tables, lib/services module with schemas, queries, actions, recurrence)
 
-Progress: [██████████████] 14%
+Progress: [████████████████████] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: 5min
-- Total execution time: 0.86 hours
+- Total plans completed: 13
+- Average duration: 4min
+- Total execution time: 0.91 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [██████████████] 14%
 |-------|-------|-------|----------|
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
 | 02-teams-and-member-profiles | 7/7 | 31min | 4min |
+| 03-services-and-calendar | 1/3 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (7min), 02-04 (4min), 02-07 (3min), 02-05 (3min), 02-06 (4min)
+- Last 5 plans: 02-04 (4min), 02-07 (3min), 02-05 (3min), 02-06 (4min), 03-01 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -90,6 +91,10 @@ Recent decisions affecting current work:
 - [02-07]: SelectContent position="popper" with max-h-48 for fixed dropdown height
 - [02-06]: Desktop roster table uses Link-wrapped rows for navigation (server component compatible)
 - [02-06]: quantityNeeded removed entirely from position schemas -- DB column default of 1 handles it
+- [03-01]: service_recurrence_patterns table created before services table to enable FK reference without ALTER TABLE
+- [03-01]: Rehearsal fields reset to null on duplicateService -- each duplicated service gets its own rehearsal schedule
+- [03-01]: Service type management restricted to admin-only (not committee) to prevent type proliferation
+- [03-01]: Date fields use DATE type (not TIMESTAMPTZ) -- church operates in single timezone
 
 ### Pending Todos
 
@@ -102,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-13
-Stopped at: Completed 02-06 teams UX gap closure -- Phase 2 COMPLETE (all 7 plans done, including 3 gap closure)
+Last session: 2026-02-14
+Stopped at: Completed 03-01-PLAN.md (services data foundation)
 Resume file: None
