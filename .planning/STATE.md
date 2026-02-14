@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 4 of 10 (Scheduling & Assignments)
-Plan: 1 of 3 completed in current phase
+Plan: 2 of 3 completed in current phase
 Status: Executing
-Last activity: 2026-02-14 -- Completed 04-01 assignment database schema and server-side module
+Last activity: 2026-02-14 -- Completed 04-02 assignment UI with combobox slots and position management
 
-Progress: [████████████████████████████████░░] 34%
+Progress: [████████████████████████████████████░] 37%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 4min
-- Total execution time: 1.15 hours
+- Total execution time: 1.27 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [███████████████████████
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
 | 02-teams-and-member-profiles | 7/7 | 31min | 4min |
 | 03-services-and-calendar | 3/3 | 11min | 4min |
-| 04-scheduling-and-assignments | 1/3 | 6min | 6min |
+| 04-scheduling-and-assignments | 2/3 | 13min | 7min |
 
 **Recent Trend:**
-- Last 5 plans: 02-06 (4min), 03-01 (3min), 03-02 (4min), 03-03 (4min), 04-01 (6min)
+- Last 5 plans: 03-01 (3min), 03-02 (4min), 03-03 (4min), 04-01 (6min), 04-02 (7min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -108,6 +108,10 @@ Recent decisions affecting current work:
 - [04-01]: Conflict detection uses single query for same-date assignments, then application-level time overlap filter
 - [04-01]: Templates store JSON snapshot of positions (positionId, positionName, category, count) for resilience
 - [04-01]: Supabase FK joins cast through 'as unknown as' to handle array vs object return type ambiguity
+- [04-02]: base-ui Combobox uses object values {value, label} for automatic search filtering by member name
+- [04-02]: InlinePositionAdder per team card plus standalone PositionAdder for adding to any team
+- [04-02]: Status badge colours: amber-pending, green-confirmed, red-declined with dark mode variants
+- [04-02]: Notes input uses debounced save (500ms timeout via useRef) rather than explicit save button
 
 ### Pending Todos
 
@@ -121,5 +125,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 04-01-PLAN.md (assignment database schema and server-side module)
+Stopped at: Completed 04-02-PLAN.md (assignment UI with combobox slots, conflict detection, position management)
 Resume file: None
