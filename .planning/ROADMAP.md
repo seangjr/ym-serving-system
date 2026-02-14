@@ -75,14 +75,12 @@ Plans:
   3. Dashboard shows upcoming services list with assignment stats and song counts, plus stats cards for upcoming services, unassigned positions, and pending confirmations
   4. Admin can create recurring service patterns (weekly, biweekly, monthly) and configure service types (sunday-morning, sunday-evening, wednesday, special-event)
   5. Admin can duplicate an existing service to a new date, copying its configuration
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: Service and service type database schema with recurring pattern support
-- [ ] 03-02: Service CRUD operations and Server Actions
-- [ ] 03-03: Calendar month view with navigation and color-coded services
-- [ ] 03-04: Dashboard layout (upcoming services list, stats cards)
-- [ ] 03-05: Recurring services, service duplication, and service type configuration
+- [ ] 03-01-PLAN.md -- Database schema (service_types, services, recurrence_patterns), Zod schemas, queries, server actions, recurrence logic
+- [ ] 03-02-PLAN.md -- Dashboard UI: calendar month view with color-coded dots, upcoming services list, stats cards, create/edit service dialog
+- [ ] 03-03-PLAN.md -- Recurring service creation, service duplication, service type configuration, service detail page
 
 ### Phase 4: Scheduling & Assignments
 **Goal**: Team leads and admins can assign members to positions on services, with conflict detection and reusable templates
@@ -216,7 +214,7 @@ Note: Phases 3, 7, 8, 9 depend only on Phase 1 and can be parallelized after Pha
 |-------|----------------|--------|-----------|
 | 1. Foundation & Authentication | 5/5 | ✓ Complete | 2026-02-13 |
 | 2. Teams & Member Profiles | 4/4 | ✓ Complete | 2026-02-13 |
-| 3. Services & Calendar | 0/5 | Not started | - |
+| 3. Services & Calendar | 0/3 | Not started | - |
 | 4. Scheduling & Assignments | 0/5 | Not started | - |
 | 5. Availability Management | 0/3 | Not started | - |
 | 6. Accept/Decline & Notifications | 0/5 | Not started | - |
