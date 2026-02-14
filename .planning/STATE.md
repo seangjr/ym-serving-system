@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Team leaders can schedule members to positions for upcoming services, and team members can see their assignments, confirm/decline, and manage their availability.
-**Current focus:** Phase 3 - Services & Calendar
+**Current focus:** Phase 4 - Scheduling & Assignments
 
 ## Current Position
 
-Phase: 3 of 10 (Services & Calendar) -- COMPLETE
-Plan: 3 of 3 completed in current phase
-Status: Phase Complete
-Last activity: 2026-02-14 -- Completed 03-03 advanced service features (recurring, duplicate, types, detail page)
+Phase: 4 of 10 (Scheduling & Assignments)
+Plan: 1 of 3 completed in current phase
+Status: Executing
+Last activity: 2026-02-14 -- Completed 04-01 assignment database schema and server-side module
 
-Progress: [██████████████████████████████] 30%
+Progress: [████████████████████████████████░░] 34%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: 4min
-- Total execution time: 1.05 hours
+- Total execution time: 1.15 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [███████████████████████
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
 | 02-teams-and-member-profiles | 7/7 | 31min | 4min |
 | 03-services-and-calendar | 3/3 | 11min | 4min |
+| 04-scheduling-and-assignments | 1/3 | 6min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 02-05 (3min), 02-06 (4min), 03-01 (3min), 03-02 (4min), 03-03 (4min)
+- Last 5 plans: 02-06 (4min), 03-01 (3min), 03-02 (4min), 03-03 (4min), 04-01 (6min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -103,6 +104,10 @@ Recent decisions affecting current work:
 - [03-03]: ServiceTypeManager uses inline forms (matching PositionManager pattern) for consistency
 - [03-03]: Service detail page is server component with thin client wrapper for action buttons
 - [03-03]: AlertDialog used for delete confirmations instead of window.confirm (accessible, consistent)
+- [04-01]: canManageTeamAssignments() helper: admin/committee always allowed, team lead for own team only
+- [04-01]: Conflict detection uses single query for same-date assignments, then application-level time overlap filter
+- [04-01]: Templates store JSON snapshot of positions (positionId, positionName, category, count) for resilience
+- [04-01]: Supabase FK joins cast through 'as unknown as' to handle array vs object return type ambiguity
 
 ### Pending Todos
 
@@ -116,5 +121,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 03-03-PLAN.md (advanced service features -- Phase 3 complete)
+Stopped at: Completed 04-01-PLAN.md (assignment database schema and server-side module)
 Resume file: None
