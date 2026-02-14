@@ -3,6 +3,8 @@
 **Defined:** 2026-02-13
 **Core Value:** Team leaders can schedule members to positions for upcoming services, and team members can see their assignments, confirm/decline, and manage their availability.
 
+> **Language Convention:** All user-facing text uses **UK English** (e.g. "colour" not "color", "organisation" not "organization"). Code-internal names (DB columns, variables) may use US English where established by frameworks.
+
 ## v1 Requirements
 
 Requirements for initial release. Each maps to roadmap phases.
@@ -39,7 +41,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Services & Calendar
 
 - [ ] **SERV-01**: Admin/team lead can create a service with title, date, time, type, and duration
-- [ ] **SERV-02**: Dashboard shows calendar month view with services color-coded by type
+- [ ] **SERV-02**: Dashboard shows calendar month view with services colour-coded by type
 - [ ] **SERV-03**: Dashboard shows upcoming services list with assignment stats and song counts
 - [ ] **SERV-04**: Dashboard shows stats cards — upcoming services, unassigned positions, pending confirmations
 - [ ] **SERV-05**: Admin can create recurring services (weekly, biweekly, monthly patterns)

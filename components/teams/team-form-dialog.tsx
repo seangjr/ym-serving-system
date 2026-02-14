@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { type ReactNode, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,9 +62,11 @@ export function TeamFormDialog({
     defaultValues: {
       name: isEdit ? team.name : "",
       description: isEdit ? (team.description ?? "") : "",
-      color: isEdit ? (team.color ?? "#3b82f6") : "#3b82f6",
+      color: isEdit ? (team.color ?? "") : "",
     },
   });
+
+  const colorValue = useWatch({ control: form.control, name: "color" });
 
   function handleSubmit(values: CreateTeamInput) {
     setServerError(null);
@@ -87,7 +89,6 @@ export function TeamFormDialog({
 
       toast.success(isEdit ? "Team updated" : "Team created");
       setOpen(false);
-      form.reset();
       onSuccess?.();
     });
   }
@@ -102,7 +103,7 @@ export function TeamFormDialog({
           form.reset({
             name: isEdit ? team.name : "",
             description: isEdit ? (team.description ?? "") : "",
-            color: isEdit ? (team.color ?? "#3b82f6") : "#3b82f6",
+            color: isEdit ? (team.color ?? "") : "",
           });
         }
       }}
@@ -154,18 +155,27 @@ export function TeamFormDialog({
             )}
           </div>
 
-          {/* Color */}
+          {/* Colour */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="team-color">Color</Label>
+            <Label htmlFor="team-colour">Colour</Label>
             <div className="flex items-center gap-3">
               <input
-                id="team-color"
+                id="team-colour"
                 type="color"
                 className="h-9 w-12 cursor-pointer rounded-md border p-1"
-                {...form.register("color")}
+                value={
+                  /^#[0-9a-fA-F]{6}$/.test(colorValue ?? "")
+                    ? (colorValue ?? "#808080")
+                    : "#808080"
+                }
+                onChange={(e) =>
+                  form.setValue("color", e.target.value, {
+                    shouldValidate: true,
+                  })
+                }
               />
               <Input
-                placeholder="#3b82f6"
+                placeholder="#808080"
                 className="flex-1"
                 {...form.register("color")}
               />

@@ -22,7 +22,7 @@ export const serviceTypeSchema = z.object({
   label: z.string().min(1, "Label is required").max(100),
   color: z
     .string()
-    .regex(HEX_COLOR_REGEX, "Must be a hex color (e.g. #6366f1)"),
+    .regex(HEX_COLOR_REGEX, "Must be a hex colour (e.g. #6366f1)"),
 });
 
 export const updateServiceTypeSchema = serviceTypeSchema.partial().extend({

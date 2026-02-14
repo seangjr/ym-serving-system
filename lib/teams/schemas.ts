@@ -9,8 +9,9 @@ export const createTeamSchema = z.object({
   description: z.string().max(500).optional(),
   color: z
     .string()
-    .regex(/^#[0-9a-fA-F]{6}$/, "Must be a hex color")
-    .optional(),
+    .regex(/^#[0-9a-fA-F]{6}$/, "Must be a valid hex colour")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
 });
 
 export const updateTeamSchema = z.object({
@@ -19,8 +20,9 @@ export const updateTeamSchema = z.object({
   description: z.string().max(500).optional(),
   color: z
     .string()
-    .regex(/^#[0-9a-fA-F]{6}$/, "Must be a hex color")
-    .optional(),
+    .regex(/^#[0-9a-fA-F]{6}$/, "Must be a valid hex colour")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
 });
 
 // ---------------------------------------------------------------------------

@@ -13,6 +13,7 @@ import {
   Monitor,
   Moon,
   Music,
+  PanelLeft,
   Shield,
   Sun,
   UserCircle,
@@ -34,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -44,7 +46,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { AppRole, NavItem } from "@/lib/auth/roles";
 import { getNavItems } from "@/lib/auth/roles";
 
@@ -82,6 +90,7 @@ interface AppSidebarProps {
 export function AppSidebar({ role, user }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { toggleSidebar } = useSidebar();
   const navItems: NavItem[] = getNavItems(role);
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -104,28 +113,51 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
     <Sidebar collapsible="icon">
       {/* Header */}
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild tooltip="YM Serving Team">
-              <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center">
-                  <Image
-                    src={logoSrc}
-                    alt="YM Logo"
-                    width={32}
-                    height={32}
-                    className="rounded"
-                  />
-                </div>
-                <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate text-sm font-bold tracking-tight">
-                    YM Serving Team
-                  </span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        {/* Expanded: logo + title + toggle */}
+        <div className="flex items-center justify-between overflow-hidden group-data-[collapsible=icon]:hidden">
+          <Link href="/dashboard" className="flex items-center gap-2.5 px-1">
+            <Image
+              src={logoSrc}
+              alt="YM Logo"
+              width={28}
+              height={28}
+              className="rounded"
+            />
+            <span className="whitespace-nowrap text-sm font-bold tracking-tight">
+              YM Serving Team
+            </span>
+          </Link>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSidebar}
+                className="size-7 shrink-0"
+              >
+                <PanelLeft className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Toggle sidebar ⌘B</TooltipContent>
+          </Tooltip>
+        </div>
+
+        {/* Collapsed: just the toggle icon */}
+        <div className="hidden items-center justify-center group-data-[collapsible=icon]:flex">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSidebar}
+                className="size-8"
+              >
+                <PanelLeft className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Toggle sidebar ⌘B</TooltipContent>
+          </Tooltip>
+        </div>
       </SidebarHeader>
 
       {/* Navigation */}
