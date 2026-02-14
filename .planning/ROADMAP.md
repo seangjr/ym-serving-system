@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Authentication** - Supabase auth, role-based access, app shell with sidebar navigation and dark mode
 - [x] **Phase 2: Teams & Member Profiles** - Ministry-agnostic team/position structure and member profile management
-- [ ] **Phase 3: Services & Calendar** - Service creation, calendar views, recurring patterns, and service templates
+- [x] **Phase 3: Services & Calendar** - Service creation, calendar views, recurring patterns, and service templates
 - [ ] **Phase 4: Scheduling & Assignments** - Assigning members to positions with conflict detection and templates
 - [ ] **Phase 5: Availability Management** - Member blackout dates, recurring unavailability, and scheduling warnings
 - [ ] **Phase 6: Accept/Decline & Notifications** - Assignment response workflow, swap requests, and in-app notification system
@@ -78,9 +78,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Database schema (service_types, services, recurrence_patterns), Zod schemas, queries, server actions, recurrence logic
-- [ ] 03-02-PLAN.md -- Dashboard UI: calendar month view with color-coded dots, upcoming services list, stats cards, create/edit service dialog
-- [ ] 03-03-PLAN.md -- Recurring service creation, service duplication, service type configuration, service detail page
+- [x] 03-01-PLAN.md -- Database schema (service_types, services, recurrence_patterns), Zod schemas, queries, server actions, recurrence logic
+- [x] 03-02-PLAN.md -- Dashboard UI: calendar month view with color-coded dots, upcoming services list, stats cards, create/edit service dialog
+- [x] 03-03-PLAN.md -- Recurring service creation, service duplication, service type configuration, service detail page
 
 ### Phase 4: Scheduling & Assignments
 **Goal**: Team leads and admins can assign members to positions on services, with conflict detection and reusable templates
@@ -214,7 +214,7 @@ Note: Phases 3, 7, 8, 9 depend only on Phase 1 and can be parallelized after Pha
 |-------|----------------|--------|-----------|
 | 1. Foundation & Authentication | 5/5 | ✓ Complete | 2026-02-13 |
 | 2. Teams & Member Profiles | 4/4 | ✓ Complete | 2026-02-13 |
-| 3. Services & Calendar | 0/3 | Not started | - |
+| 3. Services & Calendar | 3/3 | ✓ Complete | 2026-02-14 |
 | 4. Scheduling & Assignments | 0/5 | Not started | - |
 | 5. Availability Management | 0/3 | Not started | - |
 | 6. Accept/Decline & Notifications | 0/5 | Not started | - |
