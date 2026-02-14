@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 3 of 10 (Services & Calendar)
-Plan: 1 of 3 completed in current phase
+Plan: 2 of 3 completed in current phase
 Status: In Progress
-Last activity: 2026-02-14 -- Completed 03-01 services data foundation (3 tables, lib/services module with schemas, queries, actions, recurrence)
+Last activity: 2026-02-14 -- Completed 03-02 services dashboard UI (calendar, service list, stats, create/edit dialog)
 
 Progress: [████████████████████] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: 4min
-- Total execution time: 0.91 hours
+- Total execution time: 0.98 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [████████████████████] 20%
 |-------|-------|-------|----------|
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
 | 02-teams-and-member-profiles | 7/7 | 31min | 4min |
-| 03-services-and-calendar | 1/3 | 3min | 3min |
+| 03-services-and-calendar | 2/3 | 7min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 02-04 (4min), 02-07 (3min), 02-05 (3min), 02-06 (4min), 03-01 (3min)
+- Last 5 plans: 02-07 (3min), 02-05 (3min), 02-06 (4min), 03-01 (3min), 03-02 (4min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -95,6 +95,10 @@ Recent decisions affecting current work:
 - [03-01]: Rehearsal fields reset to null on duplicateService -- each duplicated service gets its own rehearsal schedule
 - [03-01]: Service type management restricted to admin-only (not committee) to prevent type proliferation
 - [03-01]: Date fields use DATE type (not TIMESTAMPTZ) -- church operates in single timezone
+- [03-02]: ServiceCalendar uses React context (ServiceCalendarContext) to pass services into custom DayButton
+- [03-02]: Dashboard page is server component; DashboardCalendar and DashboardActions are thin client wrappers for state
+- [03-02]: Service list items Link-wrapped for future /services/[id] navigation
+- [03-02]: Edit dialog in ServiceList managed via local state (editingService) rather than URL params
 
 ### Pending Todos
 
@@ -108,5 +112,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 03-01-PLAN.md (services data foundation)
+Stopped at: Completed 03-02-PLAN.md (services dashboard UI)
 Resume file: None
