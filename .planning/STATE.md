@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 ## Current Position
 
-Phase: 4 of 10 (Scheduling & Assignments)
-Plan: 2 of 3 completed in current phase
-Status: Executing
-Last activity: 2026-02-14 -- Completed 04-02 assignment UI with combobox slots and position management
+Phase: 4 of 10 (Scheduling & Assignments) -- COMPLETE
+Plan: 3 of 3 completed in current phase
+Status: Phase Complete
+Last activity: 2026-02-14 -- Completed 04-03 template save/load dialogs and real dashboard stats
 
-Progress: [████████████████████████████████████░] 37%
+Progress: [██████████████████████████████████████░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
+- Total plans completed: 18
 - Average duration: 4min
-- Total execution time: 1.27 hours
+- Total execution time: 1.33 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [███████████████████████
 | 01-foundation-and-authentication | 5/5 | 20min | 4min |
 | 02-teams-and-member-profiles | 7/7 | 31min | 4min |
 | 03-services-and-calendar | 3/3 | 11min | 4min |
-| 04-scheduling-and-assignments | 2/3 | 13min | 7min |
+| 04-scheduling-and-assignments | 3/3 | 17min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (3min), 03-02 (4min), 03-03 (4min), 04-01 (6min), 04-02 (7min)
+- Last 5 plans: 03-02 (4min), 03-03 (4min), 04-01 (6min), 04-02 (7min), 04-03 (4min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -112,6 +112,9 @@ Recent decisions affecting current work:
 - [04-02]: InlinePositionAdder per team card plus standalone PositionAdder for adding to any team
 - [04-02]: Status badge colours: amber-pending, green-confirmed, red-declined with dark mode variants
 - [04-02]: Notes input uses debounced save (500ms timeout via useRef) rather than explicit save button
+- [04-03]: fetchTemplates server action wraps getTemplates query for client component consumption (server-only import boundary)
+- [04-03]: Template list fetched on dialog open via server action rather than pre-fetched in page to ensure fresh data
+- [04-03]: Dashboard stats use multi-step query: fetch upcoming IDs, count positions, count assignments, subtract for unassigned
 
 ### Pending Todos
 
@@ -125,5 +128,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 04-02-PLAN.md (assignment UI with combobox slots, conflict detection, position management)
+Stopped at: Completed 04-03-PLAN.md (template save/load dialogs and real dashboard stats) -- Phase 4 complete
 Resume file: None
