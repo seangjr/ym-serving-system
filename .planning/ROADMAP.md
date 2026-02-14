@@ -108,12 +108,12 @@ Plans:
   2. Member can set recurring unavailability patterns (e.g., every other Wednesday)
   3. When scheduling, unavailable dates surface as warnings and the system flags the conflict before confirming the assignment
   4. Availability calendar shows a visual overview of a member's availability for team leads to reference
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 05-01: Availability database schema (one-time and recurring patterns) with RLS
-- [ ] 05-02: Availability management UI (blackout dates, recurring patterns, calendar view)
-- [ ] 05-03: Integration with scheduling -- availability warnings during assignment
+- [ ] 05-01-PLAN.md -- Database migration (blackout dates + recurring patterns tables with RLS), lib/availability module (types, schemas, recurrence, queries, actions), sidebar nav update
+- [ ] 05-02-PLAN.md -- Availability management UI: /availability page with calendar, blackout manager (single + range), recurring pattern dialog, member selector for team leads, team overlay calendar
+- [ ] 05-03-PLAN.md -- Scheduling integration: extend getEligibleMembers with unavailability data, assignment combobox warning icons, "Assign anyway?" dialog, availability banner on service detail page
 
 ### Phase 6: Accept/Decline & Notifications
 **Goal**: Members can respond to assignments and request swaps, and the system delivers in-app notifications for assignments, reminders, and changes
@@ -214,7 +214,7 @@ Note: Phases 3, 7, 8, 9 depend only on Phase 1 and can be parallelized after Pha
 | 2. Teams & Member Profiles | 4/4 | ✓ Complete | 2026-02-13 |
 | 3. Services & Calendar | 3/3 | ✓ Complete | 2026-02-14 |
 | 4. Scheduling & Assignments | 3/3 | ✓ Complete | 2026-02-14 |
-| 5. Availability Management | 0/3 | Not started | - |
+| 5. Availability Management | 0/3 | Planned | - |
 | 6. Accept/Decline & Notifications | 0/5 | Not started | - |
 | 7. Song Library & Setlists | 0/3 | Not started | - |
 | 8. Announcements & Service Communication | 0/3 | Not started | - |
