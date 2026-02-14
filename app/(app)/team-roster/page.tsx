@@ -53,7 +53,7 @@ export default async function TeamRosterPage({
   ]);
 
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-6">
+    <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">

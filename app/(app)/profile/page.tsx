@@ -32,7 +32,7 @@ export default async function ProfilePage() {
   const joinDate = profileData?.joined_serving_at ?? profile.created_at ?? null;
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">My Profile</h1>
         <p className="text-muted-foreground">{profile.full_name}</p>
@@ -57,12 +57,11 @@ export default async function ProfilePage() {
               initialData={{
                 full_name: profile.full_name,
                 email: profile.email,
-                phone: profile.phone ?? "",
-                emergency_contact_name:
-                  profile.emergency_contact_name ?? "",
-                emergency_contact_phone:
-                  profile.emergency_contact_phone ?? "",
-                birthdate: profile.birthdate ?? "",
+                contact_number: profile.contact_number ?? "",
+                emergency_contact_name: profile.emergency_contact_name ?? "",
+                emergency_contact_number:
+                  profile.emergency_contact_number ?? "",
+                date_of_birth: profile.date_of_birth ?? "",
               }}
               memberId={memberId}
             />
