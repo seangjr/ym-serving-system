@@ -162,6 +162,133 @@ export async function getUnavailableMembersForDate(
 }
 
 // ---------------------------------------------------------------------------
+// Manageable members for member selector
+// ---------------------------------------------------------------------------
+
+/**
+ * Get the list of team members that a team lead can manage.
+ * Admin/committee see all serving members (those on any team).
+ * Team leads see only members of teams they lead.
+ */
+export async function getManageableMembers(
+  callerId: string,
+  role: string,
+): Promise<{ id: string; fullName: string }[]> {
+  const supabase = await createClient();
+
+  if (role === "admin" || role === "committee") {
+    // Get all members who are on at least one team
+    const { data, error } = await supabase
+      .from("team_members")
+      .select("member_id, members(id, full_name)")
+      .order("member_id");
+
+    if (error) throw error;
+
+    // Deduplicate by member_id
+    const seen = new Set<string>();
+    const result: { id: string; fullName: string }[] = [];
+    for (const row of data ?? []) {
+      const memberId = row.member_id as string;
+      if (seen.has(memberId)) continue;
+      seen.add(memberId);
+      const member = row.members as unknown as {
+        id: string;
+        full_name: string;
+      } | null;
+      result.push({
+        id: memberId,
+        fullName: member?.full_name ?? "Unknown",
+      });
+    }
+    return result.sort((a, b) => a.fullName.localeCompare(b.fullName));
+  }
+
+  // Team lead: get members of teams this user leads
+  const { data: leaderTeams } = await supabase
+    .from("team_members")
+    .select("team_id")
+    .eq("member_id", callerId)
+    .eq("role", "lead");
+
+  if (!leaderTeams || leaderTeams.length === 0) return [];
+
+  const teamIds = leaderTeams.map((t) => t.team_id);
+
+  const { data: teamMembers, error } = await supabase
+    .from("team_members")
+    .select("member_id, members(id, full_name)")
+    .in("team_id", teamIds);
+
+  if (error) throw error;
+
+  // Deduplicate
+  const seen = new Set<string>();
+  const result: { id: string; fullName: string }[] = [];
+  for (const row of teamMembers ?? []) {
+    const memberId = row.member_id as string;
+    if (seen.has(memberId)) continue;
+    seen.add(memberId);
+    const member = row.members as unknown as {
+      id: string;
+      full_name: string;
+    } | null;
+    result.push({
+      id: memberId,
+      fullName: member?.full_name ?? "Unknown",
+    });
+  }
+  return result.sort((a, b) => a.fullName.localeCompare(b.fullName));
+}
+
+/**
+ * Get teams for the team overlay selector.
+ * Admin/committee see all active teams.
+ * Team leads see only teams they lead.
+ */
+export async function getTeamsForOverlay(
+  callerId: string,
+  role: string,
+): Promise<{ id: string; name: string }[]> {
+  const supabase = await createClient();
+
+  if (role === "admin" || role === "committee") {
+    const { data, error } = await supabase
+      .from("serving_teams")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("sort_order")
+      .order("name");
+
+    if (error) throw error;
+    return (data ?? []).map((t) => ({
+      id: t.id as string,
+      name: t.name as string,
+    }));
+  }
+
+  // Team lead: only their teams
+  const { data: leaderTeams } = await supabase
+    .from("team_members")
+    .select("team_id, serving_teams(id, name)")
+    .eq("member_id", callerId)
+    .eq("role", "lead");
+
+  if (!leaderTeams) return [];
+
+  return leaderTeams
+    .map((t) => {
+      const team = t.serving_teams as unknown as {
+        id: string;
+        name: string;
+      } | null;
+      return team ? { id: team.id, name: team.name } : null;
+    })
+    .filter((t): t is { id: string; name: string } => t !== null)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// ---------------------------------------------------------------------------
 // Team availability for overlay calendar
 // ---------------------------------------------------------------------------
 
