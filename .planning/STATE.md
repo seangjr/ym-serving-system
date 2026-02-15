@@ -19,9 +19,9 @@ Progress: [███████████████████████
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
+- Total plans completed: 21
 - Average duration: 4min
-- Total execution time: 1.50 hours
+- Total execution time: 1.62 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [███████████████████████
 | 02-teams-and-member-profiles | 7/7 | 31min | 4min |
 | 03-services-and-calendar | 3/3 | 11min | 4min |
 | 04-scheduling-and-assignments | 3/3 | 17min | 6min |
-| 05-availability-management | 2/3 | 10min | 5min |
+| 05-availability-management | 3/3 | 17min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (6min), 04-02 (7min), 04-03 (4min), 05-01 (4min), 05-03 (6min)
+- Last 5 plans: 04-02 (7min), 04-03 (4min), 05-01 (4min), 05-02 (7min), 05-03 (6min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -119,6 +119,9 @@ Recent decisions affecting current work:
 - [05-01]: canManageForMember: separated from canManageTeamAssignments since availability auth checks member-level (not service-position-level)
 - [05-01]: Recurring pattern end_date boundary checks done in both matchesRecurringPattern and query-level filters for defense in depth
 - [05-01]: Sidebar nav: Availability placed after Team Roster (admin) and after My Schedule (member) with CalendarOff icon
+- [05-02]: AvailabilityCalendar renders separate Calendar components for single vs range mode (avoids react-day-picker union type issues)
+- [05-02]: Team lead detection via team_members.role='lead' query at page level, not cached flag
+- [05-02]: fetchTeamAvailability uses dynamic import to cross server-only import boundary
 - [05-03]: Conflict check takes precedence over unavailability in assignMember; forceAssign=true bypasses both checks
 - [05-03]: Unavailable members keep alphabetical sort position in combobox (not hidden or reordered)
 - [05-03]: UnavailabilityDialog follows ConflictDialog visual pattern (amber action button, AlertDialog) for consistency
@@ -135,5 +138,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 05-03-PLAN.md (scheduling integration - availability warnings + banner)
+Stopped at: Completed 05-02-PLAN.md (availability UI - calendar, blackout manager, recurring patterns, team overlay)
 Resume file: None
