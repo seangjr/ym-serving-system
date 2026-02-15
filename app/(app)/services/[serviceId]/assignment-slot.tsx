@@ -1,6 +1,12 @@
 "use client";
 
-import { AlertTriangle, MessageSquare, Trash2, X } from "lucide-react";
+import {
+  AlertTriangle,
+  CalendarOff,
+  MessageSquare,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -40,8 +46,9 @@ import type {
   ConflictInfo,
   EligibleMember,
   ServicePositionWithAssignment,
+  UnavailabilityInfo,
 } from "@/lib/assignments/types";
-import { ConflictDialog } from "./conflict-dialog";
+import { ConflictDialog, UnavailabilityDialog } from "./conflict-dialog";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -85,6 +92,13 @@ export function AssignmentSlot({
     memberId: string;
     memberName: string;
   } | null>(null);
+  const [unavailabilityDialogOpen, setUnavailabilityDialogOpen] =
+    useState(false);
+  const [pendingUnavailability, setPendingUnavailability] = useState<{
+    info: UnavailabilityInfo;
+    memberId: string;
+    memberName: string;
+  } | null>(null);
   const [showNotes, setShowNotes] = useState(!!position.assignment?.notes);
   const [noteValue, setNoteValue] = useState(position.assignment?.notes ?? "");
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
@@ -113,6 +127,16 @@ export function AssignmentSlot({
             memberName: member.fullName,
           });
           setConflictDialogOpen(true);
+          return;
+        }
+
+        if ("unavailable" in result) {
+          setPendingUnavailability({
+            info: result.unavailable,
+            memberId,
+            memberName: member.fullName,
+          });
+          setUnavailabilityDialogOpen(true);
           return;
         }
 
@@ -154,6 +178,33 @@ export function AssignmentSlot({
       router.refresh();
     });
   }, [pendingConflict, position.id, serviceId, router]);
+
+  // -----------------------------------------------------------------------
+  // Force-assign (after unavailability confirmation)
+  // -----------------------------------------------------------------------
+
+  const handleForceAssignUnavailable = useCallback(() => {
+    if (!pendingUnavailability) return;
+
+    startTransition(async () => {
+      const result = await assignMember({
+        servicePositionId: position.id,
+        memberId: pendingUnavailability.memberId,
+        serviceId,
+        forceAssign: true,
+      });
+
+      if ("error" in result) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success("Member assigned (unavailable on this date)");
+      setUnavailabilityDialogOpen(false);
+      setPendingUnavailability(null);
+      router.refresh();
+    });
+  }, [pendingUnavailability, position.id, serviceId, router]);
 
   // -----------------------------------------------------------------------
   // Unassign handler
@@ -274,6 +325,31 @@ export function AssignmentSlot({
               </TooltipProvider>
             )}
 
+            {/* Unavailability warning icon */}
+            {(() => {
+              const assignedMember = eligibleMembers.find(
+                (m) => m.id === assignment.memberId,
+              );
+              if (assignedMember?.isUnavailable) {
+                return (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <CalendarOff className="size-4 shrink-0 text-red-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Unavailable
+                        {assignedMember.unavailabilityReason
+                          ? `: ${assignedMember.unavailabilityReason}`
+                          : ""}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              }
+              return null;
+            })()}
+
             {/* Member name */}
             <span className="text-sm">{assignment.memberName}</span>
 
@@ -359,6 +435,16 @@ export function AssignmentSlot({
           isPending={isPending}
         />
 
+        {/* Unavailability dialog */}
+        <UnavailabilityDialog
+          open={unavailabilityDialogOpen}
+          onOpenChange={setUnavailabilityDialogOpen}
+          unavailability={pendingUnavailability?.info ?? null}
+          memberName={pendingUnavailability?.memberName ?? ""}
+          onConfirm={handleForceAssignUnavailable}
+          isPending={isPending}
+        />
+
         {/* Remove position confirmation dialog */}
         <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
           <AlertDialogContent>
@@ -414,8 +500,7 @@ export function AssignmentSlot({
                   }
                 }}
                 itemToStringLabel={(memberId) =>
-                  eligibleMembers.find((m) => m.id === memberId)
-                    ?.fullName ?? ""
+                  eligibleMembers.find((m) => m.id === memberId)?.fullName ?? ""
                 }
               >
                 <ComboboxInput
@@ -431,6 +516,24 @@ export function AssignmentSlot({
                           {member.fullName}
                           {member.hasConflict && (
                             <AlertTriangle className="size-3.5 text-amber-500" />
+                          )}
+                          {member.isUnavailable && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger
+                                  asChild
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <CalendarOff className="size-3.5 text-red-400" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  Unavailable
+                                  {member.unavailabilityReason
+                                    ? `: ${member.unavailabilityReason}`
+                                    : ""}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
                         </span>
                       </ComboboxItem>
@@ -463,6 +566,16 @@ export function AssignmentSlot({
         conflict={pendingConflict?.conflict ?? null}
         memberName={pendingConflict?.memberName ?? ""}
         onConfirm={handleForceAssign}
+        isPending={isPending}
+      />
+
+      {/* Unavailability dialog */}
+      <UnavailabilityDialog
+        open={unavailabilityDialogOpen}
+        onOpenChange={setUnavailabilityDialogOpen}
+        unavailability={pendingUnavailability?.info ?? null}
+        memberName={pendingUnavailability?.memberName ?? ""}
+        onConfirm={handleForceAssignUnavailable}
         isPending={isPending}
       />
     </>

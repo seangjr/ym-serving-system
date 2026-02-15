@@ -9,11 +9,13 @@ import {
   getEligibleMembers,
   getServiceAssignments,
   getTeamsForAssignment,
+  getUnavailableMembersForService,
 } from "@/lib/assignments/queries";
 import { getUserRole, isAdminOrCommittee } from "@/lib/auth/roles";
 import { getServiceById, getServiceTypes } from "@/lib/services/queries";
 import { createClient } from "@/lib/supabase/server";
 import { AssignmentPanel } from "./assignment-panel";
+import { AvailabilityBanner } from "./availability-banner";
 import { PositionAdder } from "./position-adder";
 import { ServiceDetailActions } from "./service-detail-actions";
 
@@ -29,14 +31,21 @@ export default async function ServiceDetailPage({
   const { serviceId } = await params;
 
   const supabase = await createClient();
-  const [{ role }, service, serviceTypes, assignmentGroups, allTeams] =
-    await Promise.all([
-      getUserRole(supabase),
-      getServiceById(serviceId),
-      getServiceTypes(),
-      getServiceAssignments(serviceId),
-      getTeamsForAssignment(),
-    ]);
+  const [
+    { role },
+    service,
+    serviceTypes,
+    assignmentGroups,
+    allTeams,
+    unavailableMembers,
+  ] = await Promise.all([
+    getUserRole(supabase),
+    getServiceById(serviceId),
+    getServiceTypes(),
+    getServiceAssignments(serviceId),
+    getTeamsForAssignment(),
+    getUnavailableMembersForService(serviceId),
+  ]);
 
   if (!service) notFound();
 
@@ -123,6 +132,9 @@ export default async function ServiceDetailPage({
           />
         )}
       </div>
+
+      {/* Availability banner */}
+      <AvailabilityBanner unavailableMembers={unavailableMembers} />
 
       {/* Service info grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
