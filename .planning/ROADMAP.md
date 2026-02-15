@@ -15,8 +15,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation & Authentication** - Supabase auth, role-based access, app shell with sidebar navigation and dark mode
 - [x] **Phase 2: Teams & Member Profiles** - Ministry-agnostic team/position structure and member profile management
 - [x] **Phase 3: Services & Calendar** - Service creation, calendar views, recurring patterns, and service templates
-- [ ] **Phase 4: Scheduling & Assignments** - Assigning members to positions with conflict detection and templates
-- [ ] **Phase 5: Availability Management** - Member blackout dates, recurring unavailability, and scheduling warnings
+- [x] **Phase 4: Scheduling & Assignments** - Assigning members to positions with conflict detection and templates
+- [x] **Phase 5: Availability Management** - Member blackout dates, recurring unavailability, and scheduling warnings
 - [ ] **Phase 6: Accept/Decline & Notifications** - Assignment response workflow, swap requests, and in-app notification system
 - [ ] **Phase 7: Song Library & Setlists** - Song management, setlist building with drag-and-drop, per-service overrides
 - [ ] **Phase 8: Announcements & Service Communication** - Team announcements and per-service messaging threads
@@ -111,9 +111,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 05-01-PLAN.md -- Database migration (blackout dates + recurring patterns tables with RLS), lib/availability module (types, schemas, recurrence, queries, actions), sidebar nav update
-- [ ] 05-02-PLAN.md -- Availability management UI: /availability page with calendar, blackout manager (single + range), recurring pattern dialog, member selector for team leads, team overlay calendar
-- [ ] 05-03-PLAN.md -- Scheduling integration: extend getEligibleMembers with unavailability data, assignment combobox warning icons, "Assign anyway?" dialog, availability banner on service detail page
+- [x] 05-01-PLAN.md -- Database migration (blackout dates + recurring patterns tables with RLS), lib/availability module (types, schemas, recurrence, queries, actions), sidebar nav update
+- [x] 05-02-PLAN.md -- Availability management UI: /availability page with calendar, blackout manager (single + range), recurring pattern dialog, member selector for team leads, team overlay calendar
+- [x] 05-03-PLAN.md -- Scheduling integration: extend getEligibleMembers with unavailability data, assignment combobox warning icons, "Assign anyway?" dialog, availability banner on service detail page
 
 ### Phase 6: Accept/Decline & Notifications
 **Goal**: Members can respond to assignments and request swaps, and the system delivers in-app notifications for assignments, reminders, and changes
@@ -214,7 +214,7 @@ Note: Phases 3, 7, 8, 9 depend only on Phase 1 and can be parallelized after Pha
 | 2. Teams & Member Profiles | 4/4 | ✓ Complete | 2026-02-13 |
 | 3. Services & Calendar | 3/3 | ✓ Complete | 2026-02-14 |
 | 4. Scheduling & Assignments | 3/3 | ✓ Complete | 2026-02-14 |
-| 5. Availability Management | 0/3 | Planned | - |
+| 5. Availability Management | 3/3 | ✓ Complete | 2026-02-15 |
 | 6. Accept/Decline & Notifications | 0/5 | Not started | - |
 | 7. Song Library & Setlists | 0/3 | Not started | - |
 | 8. Announcements & Service Communication | 0/3 | Not started | - |
