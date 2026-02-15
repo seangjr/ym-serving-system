@@ -40,8 +40,17 @@ export interface EligibleMember {
     serviceTime: string;
     positionName: string;
   } | null;
+  isUnavailable: boolean;
+  unavailabilityReason: string | null;
   /** Position IDs this member has skills for (from member_position_skills). */
   positionIds: string[];
+}
+
+/** Unavailability details for the confirmation dialog. */
+export interface UnavailabilityInfo {
+  memberName: string;
+  reason: string | null;
+  type: "blackout" | "recurring";
 }
 
 /** Conflict details for the confirmation dialog. */

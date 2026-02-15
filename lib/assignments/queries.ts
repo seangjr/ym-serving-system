@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { getUnavailableMembersForDate } from "@/lib/availability/queries";
+import type { UnavailableMember } from "@/lib/availability/types";
 import type {
   ConflictInfo,
   EligibleMember,
@@ -238,6 +240,12 @@ export async function getEligibleMembers(
     }
   }
 
+  // 4.5. Check availability for all team members on the service date
+  const unavailableMap = await getUnavailableMembersForDate(
+    memberIds,
+    targetService.service_date,
+  );
+
   // 5. Fetch position skills for these members
   const { data: positionSkills } = await supabase
     .from("member_position_skills")
@@ -259,11 +267,14 @@ export async function getEligibleMembers(
       full_name: string;
     } | null;
     const conflict = conflictMap.get(memberId);
+    const unavailability = unavailableMap.get(memberId);
     return {
       id: memberId,
       fullName: members?.full_name ?? "Unknown",
       hasConflict: !!conflict,
       conflictDetails: conflict ?? null,
+      isUnavailable: !!unavailability,
+      unavailabilityReason: unavailability?.reason ?? null,
       positionIds: positionSkillMap.get(memberId) ?? [],
     };
   });
@@ -344,6 +355,79 @@ export async function getMemberConflicts(
         positionName: sp.team_positions?.name ?? "Unknown",
       };
     });
+}
+
+/**
+ * Get all unavailable members for a specific service (by service date).
+ *
+ * Fetches all team member IDs across teams that have positions on this service,
+ * then checks unavailability. Used for the availability banner on the service
+ * detail page.
+ */
+export async function getUnavailableMembersForService(
+  serviceId: string,
+): Promise<UnavailableMember[]> {
+  const supabase = await createClient();
+
+  // 1. Get service date
+  const { data: service, error: serviceError } = await supabase
+    .from("services")
+    .select("service_date")
+    .eq("id", serviceId)
+    .single();
+
+  if (serviceError || !service) return [];
+
+  // 2. Get all team member IDs across teams with positions on this service
+  const { data: servicePositions } = await supabase
+    .from("service_positions")
+    .select("team_id")
+    .eq("service_id", serviceId);
+
+  if (!servicePositions || servicePositions.length === 0) return [];
+
+  const teamIds = [...new Set(servicePositions.map((sp) => sp.team_id))];
+
+  const { data: teamMembers } = await supabase
+    .from("team_members")
+    .select("member_id, members(id, full_name)")
+    .in("team_id", teamIds);
+
+  if (!teamMembers || teamMembers.length === 0) return [];
+
+  // Deduplicate members across teams
+  const memberMap = new Map<string, string>();
+  for (const tm of teamMembers) {
+    const memberId = tm.member_id as string;
+    if (!memberMap.has(memberId)) {
+      const member = tm.members as unknown as {
+        id: string;
+        full_name: string;
+      } | null;
+      memberMap.set(memberId, member?.full_name ?? "Unknown");
+    }
+  }
+
+  const memberIds = [...memberMap.keys()];
+
+  // 3. Check unavailability
+  const unavailableMap = await getUnavailableMembersForDate(
+    memberIds,
+    service.service_date,
+  );
+
+  // 4. Build result with member names
+  const result: UnavailableMember[] = [];
+  for (const [memberId, info] of unavailableMap) {
+    result.push({
+      memberId,
+      memberName: memberMap.get(memberId) ?? "Unknown",
+      reason: info.reason,
+      type: info.type,
+    });
+  }
+
+  return result;
 }
 
 /**

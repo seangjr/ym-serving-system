@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getUserRole, isAdminOrCommittee } from "@/lib/auth/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { getUnavailableMembersForDate } from "@/lib/availability/queries";
 import { getMemberConflicts, getTemplates } from "./queries";
 import {
   addServicePositionSchema,
@@ -16,7 +17,7 @@ import {
   unassignMemberSchema,
   updateAssignmentNoteSchema,
 } from "./schemas";
-import type { ConflictInfo } from "./types";
+import type { ConflictInfo, UnavailabilityInfo } from "./types";
 
 // ---------------------------------------------------------------------------
 // Authorization helper
@@ -51,7 +52,12 @@ async function canManageTeamAssignments(
 
 export async function assignMember(
   data: unknown,
-): Promise<{ success: true } | { error: string } | { conflict: ConflictInfo }> {
+): Promise<
+  | { success: true }
+  | { error: string }
+  | { conflict: ConflictInfo }
+  | { unavailable: UnavailabilityInfo }
+> {
   const supabase = await createClient();
   const { role, memberId: callerId } = await getUserRole(supabase);
 
@@ -86,6 +92,40 @@ export async function assignMember(
 
   if (conflicts.length > 0 && !parsed.data.forceAssign) {
     return { conflict: conflicts[0] };
+  }
+
+  // Check availability (only if no conflict or force-assign covers both)
+  if (!parsed.data.forceAssign) {
+    const { data: serviceForDate } = await admin
+      .from("services")
+      .select("service_date")
+      .eq("id", parsed.data.serviceId)
+      .single();
+
+    if (serviceForDate) {
+      const unavailableMap = await getUnavailableMembersForDate(
+        [parsed.data.memberId],
+        serviceForDate.service_date,
+      );
+      const unavailability = unavailableMap.get(parsed.data.memberId);
+
+      if (unavailability) {
+        // Get member name for dialog
+        const { data: memberData } = await admin
+          .from("members")
+          .select("full_name")
+          .eq("id", parsed.data.memberId)
+          .single();
+
+        return {
+          unavailable: {
+            memberName: memberData?.full_name ?? "Unknown",
+            reason: unavailability.reason,
+            type: unavailability.type,
+          },
+        };
+      }
+    }
   }
 
   // Remove any existing assignment for this position slot first (handles
