@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 5 of 10 (Availability Management)
-Plan: 1 of 3 completed in current phase
-Status: In Progress
-Last activity: 2026-02-15 -- Completed 05-01 availability schema and lib module
+Plan: 3 of 3 completed in current phase
+Status: Phase Complete
+Last activity: 2026-02-15 -- Completed 05-03 scheduling integration (availability warnings + banner)
 
-Progress: [████████████████████████████████████████░░] 42%
+Progress: [███████████████████████████████████████████░] 45%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
+- Total plans completed: 20
 - Average duration: 4min
-- Total execution time: 1.40 hours
+- Total execution time: 1.50 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [███████████████████████
 | 02-teams-and-member-profiles | 7/7 | 31min | 4min |
 | 03-services-and-calendar | 3/3 | 11min | 4min |
 | 04-scheduling-and-assignments | 3/3 | 17min | 6min |
-| 05-availability-management | 1/3 | 4min | 4min |
+| 05-availability-management | 2/3 | 10min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (4min), 04-01 (6min), 04-02 (7min), 04-03 (4min), 05-01 (4min)
+- Last 5 plans: 04-01 (6min), 04-02 (7min), 04-03 (4min), 05-01 (4min), 05-03 (6min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -119,6 +119,9 @@ Recent decisions affecting current work:
 - [05-01]: canManageForMember: separated from canManageTeamAssignments since availability auth checks member-level (not service-position-level)
 - [05-01]: Recurring pattern end_date boundary checks done in both matchesRecurringPattern and query-level filters for defense in depth
 - [05-01]: Sidebar nav: Availability placed after Team Roster (admin) and after My Schedule (member) with CalendarOff icon
+- [05-03]: Conflict check takes precedence over unavailability in assignMember; forceAssign=true bypasses both checks
+- [05-03]: Unavailable members keep alphabetical sort position in combobox (not hidden or reordered)
+- [05-03]: UnavailabilityDialog follows ConflictDialog visual pattern (amber action button, AlertDialog) for consistency
 
 ### Pending Todos
 
@@ -132,5 +135,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 05-01-PLAN.md (availability schema and lib module)
+Stopped at: Completed 05-03-PLAN.md (scheduling integration - availability warnings + banner)
 Resume file: None
