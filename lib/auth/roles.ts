@@ -97,11 +97,12 @@ export interface NavItem {
   icon: string; // Lucide icon name
 }
 
-/** Admin and Committee see 8 navigation items. */
+/** Admin and Committee see 9 navigation items. */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { title: "Services", href: "/dashboard", icon: "Calendar" },
   { title: "Teams", href: "/teams", icon: "Layers" },
   { title: "Team Roster", href: "/team-roster", icon: "Users" },
+  { title: "Availability", href: "/availability", icon: "CalendarOff" },
   { title: "Songs", href: "/songs", icon: "Music" },
   { title: "Announcements", href: "/announcements", icon: "Megaphone" },
   { title: "Equipment", href: "/equipment", icon: "Wrench" },
@@ -109,9 +110,10 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
   { title: "Files", href: "/files", icon: "FolderOpen" },
 ];
 
-/** Members see 4 navigation items. */
+/** Members see 5 navigation items. */
 export const MEMBER_NAV_ITEMS: NavItem[] = [
   { title: "My Schedule", href: "/my-schedule", icon: "CalendarCheck" },
+  { title: "Availability", href: "/availability", icon: "CalendarOff" },
   { title: "Songs", href: "/songs", icon: "Music" },
   { title: "Announcements", href: "/announcements", icon: "Megaphone" },
   { title: "Files", href: "/files", icon: "FolderOpen" },
