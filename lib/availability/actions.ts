@@ -261,3 +261,16 @@ export async function deleteRecurringPattern(
   revalidatePath("/availability");
   return { success: true };
 }
+
+// ---------------------------------------------------------------------------
+// Team availability fetch wrapper (for client components)
+// ---------------------------------------------------------------------------
+
+export async function fetchTeamAvailability(
+  teamId: string,
+  monthStart: string,
+  monthEnd: string,
+) {
+  const { getTeamAvailability } = await import("./queries");
+  return getTeamAvailability(teamId, monthStart, monthEnd);
+}
