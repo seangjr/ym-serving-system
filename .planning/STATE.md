@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Team leaders can schedule members to positions for upcoming services, and team members can see their assignments, confirm/decline, and manage their availability.
-**Current focus:** Phase 4 - Scheduling & Assignments
+**Current focus:** Phase 5 - Availability Management
 
 ## Current Position
 
-Phase: 4 of 10 (Scheduling & Assignments) -- COMPLETE
-Plan: 3 of 3 completed in current phase
-Status: Phase Complete
-Last activity: 2026-02-14 -- Completed 04-03 template save/load dialogs and real dashboard stats
+Phase: 5 of 10 (Availability Management)
+Plan: 1 of 3 completed in current phase
+Status: In Progress
+Last activity: 2026-02-15 -- Completed 05-01 availability schema and lib module
 
-Progress: [██████████████████████████████████████░] 40%
+Progress: [████████████████████████████████████████░░] 42%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
+- Total plans completed: 19
 - Average duration: 4min
-- Total execution time: 1.33 hours
+- Total execution time: 1.40 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [███████████████████████
 | 02-teams-and-member-profiles | 7/7 | 31min | 4min |
 | 03-services-and-calendar | 3/3 | 11min | 4min |
 | 04-scheduling-and-assignments | 3/3 | 17min | 6min |
+| 05-availability-management | 1/3 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (4min), 03-03 (4min), 04-01 (6min), 04-02 (7min), 04-03 (4min)
+- Last 5 plans: 03-03 (4min), 04-01 (6min), 04-02 (7min), 04-03 (4min), 05-01 (4min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -115,6 +116,9 @@ Recent decisions affecting current work:
 - [04-03]: fetchTemplates server action wraps getTemplates query for client component consumption (server-only import boundary)
 - [04-03]: Template list fetched on dialog open via server action rather than pre-fetched in page to ensure fresh data
 - [04-03]: Dashboard stats use multi-step query: fetch upcoming IDs, count positions, count assignments, subtract for unassigned
+- [05-01]: canManageForMember: separated from canManageTeamAssignments since availability auth checks member-level (not service-position-level)
+- [05-01]: Recurring pattern end_date boundary checks done in both matchesRecurringPattern and query-level filters for defense in depth
+- [05-01]: Sidebar nav: Availability placed after Team Roster (admin) and after My Schedule (member) with CalendarOff icon
 
 ### Pending Todos
 
@@ -127,6 +131,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-14
-Stopped at: Completed 04-03-PLAN.md (template save/load dialogs and real dashboard stats) -- Phase 4 complete
+Last session: 2026-02-15
+Stopped at: Completed 05-01-PLAN.md (availability schema and lib module)
 Resume file: None
