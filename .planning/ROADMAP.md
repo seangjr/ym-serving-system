@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Services & Calendar** - Service creation, calendar views, recurring patterns, and service templates
 - [x] **Phase 4: Scheduling & Assignments** - Assigning members to positions with conflict detection and templates
 - [x] **Phase 5: Availability Management** - Member blackout dates, recurring unavailability, and scheduling warnings
-- [ ] **Phase 6: Accept/Decline & Notifications** - Assignment response workflow, swap requests, and in-app notification system
+- [x] **Phase 6: Accept/Decline & Notifications** - Assignment response workflow, swap requests, and in-app notification system
 - [ ] **Phase 7: Song Library & Setlists** - Song management, setlist building with drag-and-drop, per-service overrides
 - [ ] **Phase 8: Announcements & Service Communication** - Team announcements and per-service messaging threads
 - [ ] **Phase 9: Equipment & Files** - Equipment inventory tracking and file management for sheet music and documents
@@ -215,7 +215,7 @@ Note: Phases 3, 7, 8, 9 depend only on Phase 1 and can be parallelized after Pha
 | 3. Services & Calendar | 3/3 | ✓ Complete | 2026-02-14 |
 | 4. Scheduling & Assignments | 3/3 | ✓ Complete | 2026-02-14 |
 | 5. Availability Management | 3/3 | ✓ Complete | 2026-02-15 |
-| 6. Accept/Decline & Notifications | 0/5 | Not started | - |
+| 6. Accept/Decline & Notifications | 5/5 | ✓ Complete | 2026-02-17 |
 | 7. Song Library & Setlists | 0/3 | Not started | - |
 | 8. Announcements & Service Communication | 0/3 | Not started | - |
 | 9. Equipment & Files | 0/3 | Not started | - |
