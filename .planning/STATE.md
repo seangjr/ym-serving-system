@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Team leaders can schedule members to positions for upcoming services, and team members can see their assignments, confirm/decline, and manage their availability.
-**Current focus:** Phase 5 - Availability Management
+**Current focus:** Phase 6 - Accept/Decline & Notifications
 
 ## Current Position
 
-Phase: 5 of 10 (Availability Management)
-Plan: 3 of 3 completed in current phase
-Status: Phase Complete
-Last activity: 2026-02-15 -- Completed 05-03 scheduling integration (availability warnings + banner)
+Phase: 6 of 10 (Accept/Decline & Notifications)
+Plan: 1 of 5 completed in current phase
+Status: In Progress
+Last activity: 2026-02-17 -- Completed 06-01 notification foundation (tables, providers, queries, actions)
 
-Progress: [███████████████████████████████████████████░] 45%
+Progress: [██████████████████████████████████████████████░] 47%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 22
 - Average duration: 4min
-- Total execution time: 1.62 hours
+- Total execution time: 1.67 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [███████████████████████
 | 03-services-and-calendar | 3/3 | 11min | 4min |
 | 04-scheduling-and-assignments | 3/3 | 17min | 6min |
 | 05-availability-management | 3/3 | 17min | 6min |
+| 06-accept-decline-and-notifications | 1/5 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (7min), 04-03 (4min), 05-01 (4min), 05-02 (7min), 05-03 (6min)
+- Last 5 plans: 04-03 (4min), 05-01 (4min), 05-02 (7min), 05-03 (6min), 06-01 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -125,6 +126,10 @@ Recent decisions affecting current work:
 - [05-03]: Conflict check takes precedence over unavailability in assignMember; forceAssign=true bypasses both checks
 - [05-03]: Unavailable members keep alphabetical sort position in combobox (not hidden or reordered)
 - [05-03]: UnavailabilityDialog follows ConflictDialog visual pattern (amber action button, AlertDialog) for consistency
+- [06-01]: Provider pattern for notifications -- InAppProvider now, extensible for Email/Telegram/WhatsApp later
+- [06-01]: createNotification wraps provider.send in try/catch so notification failures never break calling actions
+- [06-01]: getMyAssignments uses !inner joins to filter by service_date >= today for upcoming-only schedule
+- [06-01]: getPendingSwapsForTeamLead uses admin client to bypass RLS and find swaps across team lead's teams
 
 ### Pending Todos
 
@@ -137,6 +142,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-15
-Stopped at: Phase 5 complete -- all 3 plans executed, verification passed (21/21 must-haves)
+Last session: 2026-02-17
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
