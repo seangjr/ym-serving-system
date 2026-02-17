@@ -248,3 +248,199 @@ export async function getPendingSwapsForTeamLead(
     updatedAt: row.updated_at,
   }));
 }
+
+// ---------------------------------------------------------------------------
+// Service-level swap queries (for service detail page)
+// ---------------------------------------------------------------------------
+
+/**
+ * Extended swap request with position and service context for display.
+ */
+export interface SwapRequestWithContext extends SwapRequest {
+  positionName: string;
+  serviceTitle: string;
+  serviceId: string;
+}
+
+/**
+ * Get all swap requests for a specific service.
+ * Used on the service detail page for team lead approval view.
+ */
+export async function getSwapRequestsForService(
+  serviceId: string,
+): Promise<SwapRequestWithContext[]> {
+  const admin = createAdminClient();
+
+  const { data, error } = await admin
+    .from("swap_requests")
+    .select(
+      `
+      id,
+      assignment_id,
+      requester_member_id,
+      target_member_id,
+      status,
+      reason,
+      resolved_by,
+      resolved_at,
+      created_at,
+      updated_at,
+      requester:members!requester_member_id(full_name),
+      target:members!target_member_id(full_name),
+      service_assignments!inner(
+        service_positions!inner(
+          services!inner(id, title),
+          team_positions(name)
+        )
+      )
+    `,
+    )
+    .eq(
+      "service_assignments.service_positions.services.id",
+      serviceId,
+    )
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return (data ?? []).map((row) => {
+    const sa = row.service_assignments as unknown as {
+      service_positions: {
+        services: { id: string; title: string };
+        team_positions: { name: string } | null;
+      };
+    };
+
+    return {
+      id: row.id,
+      assignmentId: row.assignment_id,
+      requesterMemberId: row.requester_member_id,
+      requesterName:
+        (row.requester as unknown as { full_name: string } | null)
+          ?.full_name ?? "Unknown",
+      targetMemberId: row.target_member_id,
+      targetName:
+        (row.target as unknown as { full_name: string } | null)?.full_name ??
+        "Unknown",
+      status: row.status,
+      reason: row.reason,
+      resolvedBy: row.resolved_by,
+      resolvedAt: row.resolved_at,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      positionName: sa.service_positions.team_positions?.name ?? "Unknown",
+      serviceTitle: sa.service_positions.services.title,
+      serviceId: sa.service_positions.services.id,
+    };
+  });
+}
+
+/**
+ * Get the active (pending) swap request for an assignment, if any.
+ * Used to show "Swap Pending" state on assignment card.
+ */
+export async function getActiveSwapForAssignment(
+  assignmentId: string,
+): Promise<SwapRequest | null> {
+  const admin = createAdminClient();
+
+  const { data, error } = await admin
+    .from("swap_requests")
+    .select(
+      `
+      id,
+      assignment_id,
+      requester_member_id,
+      target_member_id,
+      status,
+      reason,
+      resolved_by,
+      resolved_at,
+      created_at,
+      updated_at,
+      requester:members!requester_member_id(full_name),
+      target:members!target_member_id(full_name)
+    `,
+    )
+    .eq("assignment_id", assignmentId)
+    .eq("status", "pending")
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    assignmentId: data.assignment_id,
+    requesterMemberId: data.requester_member_id,
+    requesterName:
+      (data.requester as unknown as { full_name: string } | null)
+        ?.full_name ?? "Unknown",
+    targetMemberId: data.target_member_id,
+    targetName:
+      (data.target as unknown as { full_name: string } | null)?.full_name ??
+      "Unknown",
+    status: data.status,
+    reason: data.reason,
+    resolvedBy: data.resolved_by,
+    resolvedAt: data.resolved_at,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
+}
+
+/**
+ * Get team members eligible for swap (everyone on the same team except the current member).
+ * Used to populate the swap partner dropdown.
+ */
+export async function getTeamMembersForSwap(
+  assignmentId: string,
+  currentMemberId: string,
+): Promise<{ id: string; fullName: string }[]> {
+  const admin = createAdminClient();
+
+  // Find the team for this assignment's position
+  const { data: assignment } = await admin
+    .from("service_assignments")
+    .select(
+      `
+      service_positions!inner(
+        team_id
+      )
+    `,
+    )
+    .eq("id", assignmentId)
+    .single();
+
+  if (!assignment) return [];
+
+  const teamId = (
+    assignment.service_positions as unknown as { team_id: string }
+  ).team_id;
+
+  // Get all team members except the current member
+  const { data: teamMembers, error } = await admin
+    .from("team_members")
+    .select(
+      `
+      member_id,
+      members!inner(id, full_name)
+    `,
+    )
+    .eq("team_id", teamId)
+    .neq("member_id", currentMemberId);
+
+  if (error) throw error;
+
+  return (teamMembers ?? []).map((tm) => {
+    const member = tm.members as unknown as {
+      id: string;
+      full_name: string;
+    };
+    return {
+      id: member.id,
+      fullName: member.full_name,
+    };
+  });
+}
