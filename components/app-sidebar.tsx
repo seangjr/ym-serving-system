@@ -2,8 +2,10 @@
 
 import {
   BarChart3,
+  Bell,
   Calendar,
   CalendarCheck,
+  CalendarOff,
   ChevronsUpDown,
   FolderOpen,
   Layers,
@@ -62,8 +64,10 @@ import { getNavItems } from "@/lib/auth/roles";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   BarChart3,
+  Bell,
   Calendar,
   CalendarCheck,
+  CalendarOff,
   FolderOpen,
   Layers,
   Megaphone,
