@@ -5,6 +5,7 @@ import { getUserRole, isAdminOrCommittee } from "@/lib/auth/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getUnavailableMembersForDate } from "@/lib/availability/queries";
+import { createNotification } from "@/lib/notifications/send";
 import { getMemberConflicts, getTemplates } from "./queries";
 import {
   addServicePositionSchema,
@@ -135,16 +136,64 @@ export async function assignMember(
     .delete()
     .eq("service_position_id", parsed.data.servicePositionId);
 
-  const { error } = await admin.from("service_assignments").insert({
-    service_position_id: parsed.data.servicePositionId,
-    member_id: parsed.data.memberId,
-    status: "pending",
-    notes: parsed.data.notes || null,
-    has_conflict: conflicts.length > 0,
-    assigned_by: callerId,
-  });
+  const { data: inserted, error } = await admin
+    .from("service_assignments")
+    .insert({
+      service_position_id: parsed.data.servicePositionId,
+      member_id: parsed.data.memberId,
+      status: "pending",
+      notes: parsed.data.notes || null,
+      has_conflict: conflicts.length > 0,
+      assigned_by: callerId,
+    })
+    .select("id")
+    .single();
 
   if (error) return { error: error.message };
+
+  // Emit assignment_new notification (non-blocking -- failure never breaks assign)
+  try {
+    const { data: posDetail } = await admin
+      .from("service_positions")
+      .select(
+        `
+        team_positions(name),
+        services(title, service_date)
+      `,
+      )
+      .eq("id", parsed.data.servicePositionId)
+      .single();
+
+    const posName =
+      (posDetail?.team_positions as unknown as { name: string } | null)
+        ?.name ?? "a position";
+    const svc = posDetail?.services as unknown as {
+      title: string;
+      service_date: string;
+    } | null;
+    const svcTitle = svc?.title ?? "a service";
+    const formattedDate = svc?.service_date
+      ? new Date(`${svc.service_date}T00:00:00`).toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        })
+      : "";
+
+    await createNotification({
+      recipientMemberId: parsed.data.memberId,
+      type: "assignment_new",
+      title: "New Assignment",
+      body: `You have been assigned as ${posName} for ${svcTitle}${formattedDate ? ` on ${formattedDate}` : ""}`,
+      metadata: {
+        assignmentId: inserted?.id,
+        serviceId: parsed.data.serviceId,
+      },
+      actionUrl: "/my-schedule",
+    });
+  } catch {
+    // Notification failure should NOT fail the assignment
+  }
 
   revalidatePath(`/services/${parsed.data.serviceId}`);
   return { success: true };
@@ -179,12 +228,60 @@ export async function unassignMember(
     };
   }
 
+  // Fetch assignment details BEFORE deleting (for notification)
+  const { data: existingAssignment } = await admin
+    .from("service_assignments")
+    .select(
+      `
+      member_id,
+      service_positions(
+        team_positions(name),
+        services(title, service_date)
+      )
+    `,
+    )
+    .eq("service_position_id", parsed.data.servicePositionId)
+    .single();
+
   const { error } = await admin
     .from("service_assignments")
     .delete()
     .eq("service_position_id", parsed.data.servicePositionId);
 
   if (error) return { error: error.message };
+
+  // Emit assignment_changed notification (non-blocking)
+  if (existingAssignment?.member_id) {
+    try {
+      const spDetail = existingAssignment.service_positions as unknown as {
+        team_positions: { name: string } | null;
+        services: { title: string; service_date: string } | null;
+      } | null;
+
+      const posName = spDetail?.team_positions?.name ?? "a position";
+      const svcTitle = spDetail?.services?.title ?? "a service";
+      const formattedDate = spDetail?.services?.service_date
+        ? new Date(
+            `${spDetail.services.service_date}T00:00:00`,
+          ).toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+          })
+        : "";
+
+      await createNotification({
+        recipientMemberId: existingAssignment.member_id,
+        type: "assignment_changed",
+        title: "Assignment Removed",
+        body: `Your ${posName} assignment for ${svcTitle}${formattedDate ? ` on ${formattedDate}` : ""} has been removed`,
+        metadata: { serviceId: parsed.data.serviceId },
+        actionUrl: "/my-schedule",
+      });
+    } catch {
+      // Notification failure should NOT fail the unassignment
+    }
+  }
 
   revalidatePath(`/services/${parsed.data.serviceId}`);
   return { success: true };
