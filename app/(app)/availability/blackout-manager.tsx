@@ -7,7 +7,7 @@ import {
   parseISO,
   startOfMonth,
 } from "date-fns";
-import { CalendarX2, Trash2 } from "lucide-react";
+import { X } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -36,7 +36,11 @@ interface BlackoutManagerProps {
   isManagingOther: boolean;
 }
 
-type Mode = "view" | "single" | "range";
+// What the user has selected but not yet confirmed
+type PendingSelection =
+  | { type: "single"; date: Date }
+  | { type: "range"; from: Date; to: Date }
+  | { type: "remove"; blackout: BlackoutDate };
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -74,7 +78,6 @@ function buildCalendarData(
   const expanded = expandRecurringPatterns(dbPatterns, monthStart, monthEnd);
 
   for (const [dateKey, _memberIds] of expanded) {
-    // Find matching pattern for reason
     const matchingPattern = recurringPatterns.find((p) => {
       const startDate = parseISO(p.startDate);
       const dateObj = parseISO(dateKey);
@@ -98,9 +101,10 @@ export function BlackoutManager({
   targetMemberId,
   isManagingOther: _isManagingOther,
 }: BlackoutManagerProps) {
-  const [mode, setMode] = React.useState<Mode>("view");
+  const [isRangeMode, setIsRangeMode] = React.useState(false);
   const [month, setMonth] = React.useState(startOfMonth(new Date()));
   const [reason, setReason] = React.useState("");
+  const [pending, setPending] = React.useState<PendingSelection | null>(null);
   const [rangeSelected, setRangeSelected] = React.useState<{
     from: Date | undefined;
     to: Date | undefined;
@@ -112,137 +116,205 @@ export function BlackoutManager({
     [blackouts, recurringPatterns, month],
   );
 
-  // Future blackouts only for the list below calendar
-  const futureBlackouts = blackouts.filter(
-    (b) => parseISO(b.endDate) >= new Date(new Date().toDateString()),
-  );
-
-  function handleSingleClick(date: Date) {
-    if (mode !== "single") return;
-    startTransition(async () => {
-      const dateStr = format(date, "yyyy-MM-dd");
-      const result = await addBlackoutDate({
-        memberId: targetMemberId,
-        startDate: dateStr,
-        reason: reason || undefined,
-      });
-      if ("error" in result) {
-        toast.error(result.error);
-      } else {
-        toast.success(`Blackout date added: ${format(date, "MMM d, yyyy")}`);
-        setReason("");
-      }
+  // Check if a clicked date is already a blackout (for toggle-to-delete)
+  function findBlackoutForDate(date: Date): BlackoutDate | undefined {
+    const dateStr = format(date, "yyyy-MM-dd");
+    return blackouts.find((b) => {
+      const start = parseISO(b.startDate);
+      const end = parseISO(b.endDate);
+      const d = parseISO(dateStr);
+      return d >= start && d <= end;
     });
   }
 
-  function handleRangeSubmit() {
-    const from = rangeSelected.from;
-    const to = rangeSelected.to;
-    if (!from || !to) {
-      toast.error("Please select both start and end dates.");
+  // Single date click: show confirmation strip for add or remove
+  function handleDayClick(date: Date) {
+    const existing = findBlackoutForDate(date);
+    if (existing) {
+      setPending({ type: "remove", blackout: existing });
+      setReason("");
       return;
     }
+    setPending({ type: "single", date });
+    setReason("");
+  }
+
+  // Range selection completed
+  function handleRangeSelect(range: {
+    from: Date | undefined;
+    to: Date | undefined;
+  }) {
+    setRangeSelected(range);
+    if (range.from && range.to) {
+      setPending({ type: "range", from: range.from, to: range.to });
+      setReason("");
+    } else {
+      setPending(null);
+    }
+  }
+
+  // Confirm the pending selection
+  function handleConfirm() {
+    if (!pending) return;
+
     startTransition(async () => {
-      const result = await addBlackoutRange({
-        memberId: targetMemberId,
-        startDate: format(from, "yyyy-MM-dd"),
-        endDate: format(to, "yyyy-MM-dd"),
-        reason: reason || undefined,
-      });
-      if ("error" in result) {
-        toast.error(result.error);
+      if (pending.type === "remove") {
+        const result = await deleteBlackout({ blackoutId: pending.blackout.id });
+        if ("error" in result) {
+          toast.error(result.error);
+        } else {
+          toast.success("Blackout removed.");
+        }
+      } else if (pending.type === "single") {
+        const dateStr = format(pending.date, "yyyy-MM-dd");
+        const result = await addBlackoutDate({
+          memberId: targetMemberId,
+          startDate: dateStr,
+          reason: reason || undefined,
+        });
+        if ("error" in result) {
+          toast.error(result.error);
+        } else {
+          toast.success(
+            `Blocked: ${format(pending.date, "MMM d, yyyy")}`,
+          );
+        }
       } else {
-        toast.success(
-          `Blackout range added: ${format(from, "MMM d")} - ${format(to, "MMM d, yyyy")}`,
-        );
-        setReason("");
-        setRangeSelected({ from: undefined, to: undefined });
+        const result = await addBlackoutRange({
+          memberId: targetMemberId,
+          startDate: format(pending.from, "yyyy-MM-dd"),
+          endDate: format(pending.to, "yyyy-MM-dd"),
+          reason: reason || undefined,
+        });
+        if ("error" in result) {
+          toast.error(result.error);
+        } else {
+          toast.success(
+            `Blocked: ${format(pending.from, "MMM d")} - ${format(pending.to, "MMM d, yyyy")}`,
+          );
+        }
       }
+      setPending(null);
+      setReason("");
+      setRangeSelected({ from: undefined, to: undefined });
+      setIsRangeMode(false);
     });
   }
 
-  function handleDelete(blackoutId: string) {
-    startTransition(async () => {
-      const result = await deleteBlackout({ blackoutId });
-      if ("error" in result) {
-        toast.error(result.error);
-      } else {
-        toast.success("Blackout date removed.");
-      }
-    });
+  function handleCancel() {
+    setPending(null);
+    setReason("");
+    setRangeSelected({ from: undefined, to: undefined });
   }
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Mode toggle */}
-      <div className="flex items-center gap-2">
-        <div className="inline-flex items-center rounded-lg border p-0.5">
-          <Button
-            variant={mode === "view" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setMode("view")}
-            className="h-7 px-3 text-xs"
-          >
-            View
-          </Button>
-          <Button
-            variant={mode === "single" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => {
-              setMode("single");
-              setRangeSelected({ from: undefined, to: undefined });
-            }}
-            className="h-7 px-3 text-xs"
-          >
-            Add Date
-          </Button>
-          <Button
-            variant={mode === "range" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setMode("range")}
-            className="h-7 px-3 text-xs"
-          >
-            Add Range
-          </Button>
-        </div>
-        {isPending && (
-          <span className="text-xs text-muted-foreground">Saving...</span>
-        )}
+      {/* Instructions + range toggle */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">
+          {isRangeMode
+            ? "Select a start and end date on the calendar"
+            : "Tap a date to block it. Tap a blocked date to remove it."}
+        </p>
+        <Button
+          variant={isRangeMode ? "secondary" : "outline"}
+          size="sm"
+          className="h-7 px-3 text-xs"
+          onClick={() => {
+            setIsRangeMode(!isRangeMode);
+            setPending(null);
+            setReason("");
+            setRangeSelected({ from: undefined, to: undefined });
+          }}
+        >
+          {isRangeMode ? "Single Date" : "Select Range"}
+        </Button>
       </div>
 
-      {/* Reason input (shown in single or range mode) */}
-      {(mode === "single" || mode === "range") && (
-        <div className="flex items-center gap-2">
-          <Input
-            type="text"
-            placeholder="Reason (optional)"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            className="h-8 text-sm"
-          />
-          {mode === "range" && rangeSelected.from && rangeSelected.to && (
-            <Button
-              size="sm"
-              onClick={handleRangeSubmit}
-              disabled={isPending}
-              className="h-8 whitespace-nowrap"
-            >
-              Add Range
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* Calendar */}
+      {/* Calendar — always interactive */}
       <AvailabilityCalendar
         data={calendarData}
         month={month}
         onMonthChange={setMonth}
-        mode={mode === "range" ? "range" : "single"}
-        rangeSelected={mode === "range" ? rangeSelected : undefined}
-        onRangeSelect={mode === "range" ? setRangeSelected : undefined}
-        onDayClick={mode === "single" ? handleSingleClick : undefined}
+        mode={isRangeMode ? "range" : "single"}
+        rangeSelected={isRangeMode ? rangeSelected : undefined}
+        onRangeSelect={isRangeMode ? handleRangeSelect : undefined}
+        onDayClick={!isRangeMode ? handleDayClick : undefined}
       />
+
+      {/* Confirmation strip — appears after date selection */}
+      {pending && pending.type === "remove" && (
+        <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-3 animate-in fade-in slide-in-from-top-1 duration-200">
+          <div className="flex flex-col">
+            <p className="text-sm font-medium">
+              Remove blackout: {pending.blackout.startDate === pending.blackout.endDate
+                ? format(parseISO(pending.blackout.startDate), "EEEE, MMM d, yyyy")
+                : `${format(parseISO(pending.blackout.startDate), "MMM d")} — ${format(parseISO(pending.blackout.endDate), "MMM d, yyyy")}`}
+            </p>
+            {pending.blackout.reason && (
+              <p className="text-xs text-muted-foreground">{pending.blackout.reason}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7"
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleConfirm}
+              disabled={isPending}
+              className="h-7"
+            >
+              {isPending ? "Removing..." : "Remove"}
+            </Button>
+          </div>
+        </div>
+      )}
+      {pending && pending.type !== "remove" && (
+        <div className="flex flex-col gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 animate-in fade-in slide-in-from-top-1 duration-200">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">
+              {pending.type === "single"
+                ? `Block ${format(pending.date, "EEEE, MMM d, yyyy")}`
+                : `Block ${format(pending.from, "MMM d")} — ${format(pending.to, "MMM d, yyyy")}`}
+            </p>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-6"
+              onClick={handleCancel}
+            >
+              <X className="size-3.5" />
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              type="text"
+              placeholder="Reason (optional)"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="h-8 text-sm"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleConfirm();
+              }}
+            />
+            <Button
+              size="sm"
+              onClick={handleConfirm}
+              disabled={isPending}
+              className="h-8 whitespace-nowrap"
+            >
+              {isPending ? "Saving..." : "Block"}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Legend */}
       <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -256,47 +328,6 @@ export function BlackoutManager({
         </div>
       </div>
 
-      {/* Blackout list */}
-      {futureBlackouts.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium flex items-center gap-1.5">
-            <CalendarX2 className="size-3.5" />
-            Upcoming Blackout Dates
-          </h3>
-          <div className="flex flex-col gap-1">
-            {futureBlackouts.map((b) => {
-              const isSingleDay = b.startDate === b.endDate;
-              const dateDisplay = isSingleDay
-                ? format(parseISO(b.startDate), "MMM d, yyyy")
-                : `${format(parseISO(b.startDate), "MMM d")} - ${format(parseISO(b.endDate), "MMM d, yyyy")}`;
-              return (
-                <div
-                  key={b.id}
-                  className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
-                >
-                  <div className="flex flex-col">
-                    <span className="font-medium">{dateDisplay}</span>
-                    {b.reason && (
-                      <span className="text-xs text-muted-foreground">
-                        {b.reason}
-                      </span>
-                    )}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-7 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleDelete(b.id)}
-                    disabled={isPending}
-                  >
-                    <Trash2 className="size-3.5" />
-                  </Button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

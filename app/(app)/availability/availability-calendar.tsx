@@ -1,5 +1,6 @@
 "use client";
 
+import { format as formatDate } from "date-fns";
 import * as React from "react";
 import type { DayButton } from "react-day-picker";
 import { Button } from "@/components/ui/button";
@@ -60,7 +61,7 @@ function AvailabilityDayButton({
     if (modifiers.focused) ref.current?.focus();
   }, [modifiers.focused]);
 
-  const dateKey = day.date.toISOString().slice(0, 10);
+  const dateKey = formatDate(day.date, "yyyy-MM-dd");
   const isBlackout = blackoutDates.has(dateKey);
   const isRecurring = !isBlackout && recurringDates.has(dateKey);
   const isPast = day.date < new Date(new Date().toDateString());

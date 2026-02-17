@@ -10,6 +10,7 @@ import {
 } from "@/lib/availability/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { BlackoutList } from "./blackout-list";
 import { BlackoutManager } from "./blackout-manager";
 import { MemberSelector } from "./member-selector";
 import { RecurringPatternDialog } from "./recurring-pattern-dialog";
@@ -106,24 +107,23 @@ export default async function AvailabilityPage({
       </div>
 
       <Tabs defaultValue="my-availability">
-        <TabsList>
-          <TabsTrigger value="my-availability">My Availability</TabsTrigger>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <TabsList>
+            <TabsTrigger value="my-availability">My Availability</TabsTrigger>
+            {isTeamLead && (
+              <TabsTrigger value="team-overview">Team Overview</TabsTrigger>
+            )}
+          </TabsList>
           {isTeamLead && (
-            <TabsTrigger value="team-overview">Team Overview</TabsTrigger>
+            <MemberSelector
+              members={manageableMembers}
+              currentMemberId={targetMemberId}
+              ownMemberId={callerId}
+            />
           )}
-        </TabsList>
+        </div>
 
         <TabsContent value="my-availability" className="mt-4">
-          {isTeamLead && (
-            <div className="mb-4">
-              <MemberSelector
-                members={manageableMembers}
-                currentMemberId={targetMemberId}
-                ownMemberId={callerId}
-              />
-            </div>
-          )}
-
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <BlackoutManager
@@ -133,7 +133,8 @@ export default async function AvailabilityPage({
                 isManagingOther={isManagingOther}
               />
             </div>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
+              <BlackoutList blackouts={blackouts} />
               <RecurringPatternList
                 patterns={recurringPatterns}
                 targetMemberId={targetMemberId}

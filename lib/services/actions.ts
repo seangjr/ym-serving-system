@@ -84,18 +84,19 @@ export async function updateService(
   if (fields.serviceDate !== undefined)
     updates.service_date = fields.serviceDate;
   if (fields.startTime !== undefined) updates.start_time = fields.startTime;
-  if (fields.endTime !== undefined) updates.end_time = fields.endTime;
+  if (fields.endTime !== undefined)
+    updates.end_time = fields.endTime || null;
   if (fields.durationMinutes !== undefined)
     updates.duration_minutes = fields.durationMinutes;
   if (fields.serviceTypeId !== undefined)
-    updates.service_type_id = fields.serviceTypeId;
+    updates.service_type_id = fields.serviceTypeId || null;
   if (fields.rehearsalDate !== undefined)
-    updates.rehearsal_date = fields.rehearsalDate;
+    updates.rehearsal_date = fields.rehearsalDate || null;
   if (fields.rehearsalTime !== undefined)
-    updates.rehearsal_time = fields.rehearsalTime;
+    updates.rehearsal_time = fields.rehearsalTime || null;
   if (fields.rehearsalNotes !== undefined)
-    updates.rehearsal_notes = fields.rehearsalNotes;
-  if (fields.notes !== undefined) updates.notes = fields.notes;
+    updates.rehearsal_notes = fields.rehearsalNotes || null;
+  if (fields.notes !== undefined) updates.notes = fields.notes || null;
 
   const admin = createAdminClient();
   const { error } = await admin.from("services").update(updates).eq("id", id);

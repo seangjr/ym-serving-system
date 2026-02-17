@@ -51,8 +51,8 @@ export default async function DashboardPage() {
     id: s.id,
     title: s.title,
     serviceDate: s.service_date,
-    startTime: s.start_time,
-    endTime: s.end_time ?? undefined,
+    startTime: s.start_time.slice(0, 5),
+    endTime: s.end_time?.slice(0, 5) ?? undefined,
     serviceType: s.service_types
       ? {
           id: s.service_types.id,

@@ -83,17 +83,20 @@ export function RecurringPatternList({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <CalendarClock className="size-4" />
-          Recurring Patterns
+          Regular Unavailability
         </CardTitle>
+        <p className="text-xs text-muted-foreground">
+          Days you&apos;re regularly unable to serve (e.g. work shifts, classes)
+        </p>
       </CardHeader>
       <CardContent>
         {patterns.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-6 text-center">
             <p className="text-sm text-muted-foreground">
-              No recurring patterns set
+              No regular unavailability set
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Add a recurring pattern below to mark regular unavailability
+              e.g. &quot;Every Wednesday&quot; or &quot;Every other Sunday&quot;
             </p>
           </div>
         ) : (

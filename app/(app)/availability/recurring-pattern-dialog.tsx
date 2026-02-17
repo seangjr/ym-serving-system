@@ -175,14 +175,15 @@ export function RecurringPatternDialog({
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="w-full">
           <CalendarClock className="size-4 mr-2" />
-          Add Recurring Pattern
+          Add Regular Unavailability
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Recurring Unavailability</DialogTitle>
+          <DialogTitle>Add Regular Unavailability</DialogTitle>
           <DialogDescription>
-            Set a pattern for dates you are regularly unavailable.
+            Set days you&apos;re regularly unable to serve. These will show as
+            warnings when team leads try to schedule you.
           </DialogDescription>
         </DialogHeader>
 
