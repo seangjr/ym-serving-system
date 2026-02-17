@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 6 of 10 (Accept/Decline & Notifications)
-Plan: 1 of 5 completed in current phase
+Plan: 2 of 5 completed in current phase
 Status: In Progress
-Last activity: 2026-02-17 -- Completed 06-01 notification foundation (tables, providers, queries, actions)
+Last activity: 2026-02-17 -- Completed 06-02 accept/decline workflow and My Schedule page
 
-Progress: [██████████████████████████████████████████████░] 47%
+Progress: [████████████████████████████████████████████████░] 49%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
+- Total plans completed: 23
 - Average duration: 4min
-- Total execution time: 1.67 hours
+- Total execution time: 1.72 hours
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: [███████████████████████
 | 03-services-and-calendar | 3/3 | 11min | 4min |
 | 04-scheduling-and-assignments | 3/3 | 17min | 6min |
 | 05-availability-management | 3/3 | 17min | 6min |
-| 06-accept-decline-and-notifications | 1/5 | 3min | 3min |
+| 06-accept-decline-and-notifications | 2/5 | 6min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 04-03 (4min), 05-01 (4min), 05-02 (7min), 05-03 (6min), 06-01 (3min)
+- Last 5 plans: 05-01 (4min), 05-02 (7min), 05-03 (6min), 06-01 (3min), 06-02 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -130,6 +130,10 @@ Recent decisions affecting current work:
 - [06-01]: createNotification wraps provider.send in try/catch so notification failures never break calling actions
 - [06-01]: getMyAssignments uses !inner joins to filter by service_date >= today for upcoming-only schedule
 - [06-01]: getPendingSwapsForTeamLead uses admin client to bypass RLS and find swaps across team lead's teams
+- [06-02]: Confirm is 1 tap (no dialog), decline opens AlertDialog confirmation per user decision
+- [06-02]: AssignmentResponseButtons use optimistic state via useState + useTransition for instant visual feedback
+- [06-02]: Status badge reuses Phase 4 color convention: amber-pending, green-confirmed, red-declined
+- [06-02]: Active state on buttons: confirmed shows solid green check, declined shows solid red X
 
 ### Pending Todos
 
@@ -143,5 +147,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 06-01-PLAN.md
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
