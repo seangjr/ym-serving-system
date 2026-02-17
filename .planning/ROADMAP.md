@@ -125,14 +125,14 @@ Plans:
   3. Confirm/decline can be done in 1-2 taps on mobile
   4. System sends in-app notifications for new assignments, schedule changes, and configurable reminders before service date
   5. Notifications show read/unread state, and the notification system is architected to be provider-extensible for future Telegram/WhatsApp integration
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 06-01: Notification system database schema and provider-extensible architecture
-- [ ] 06-02: Accept/decline assignment workflow UI and Server Actions
-- [ ] 06-03: Swap request workflow (request, notify eligible, approve/reject)
-- [ ] 06-04: In-app notification UI (bell icon, notification list, read/unread)
-- [ ] 06-05: Reminder system (configurable days before service)
+- [ ] 06-01-PLAN.md -- Notification system database schema (notifications + swap_requests tables) and provider-extensible lib/notifications/ module
+- [ ] 06-02-PLAN.md -- Accept/decline assignment workflow: respondToAssignment server action + My Schedule page with confirm/decline buttons
+- [ ] 06-03-PLAN.md -- In-app notification UI: bell icon with unread badge, notification dropdown, Supabase Realtime subscription, emit notifications on assign/unassign
+- [ ] 06-04-PLAN.md -- Swap request workflow: request/accept/approve/reject state machine with notifications, swap dialog on My Schedule, approval list on service detail
+- [ ] 06-05-PLAN.md -- Reminder system: daily reminder generation via pg_cron Postgres function and API route, per-member configurable reminder_days_before
 
 ### Phase 7: Song Library & Setlists
 **Goal**: Team leads can manage a song library and build service setlists with drag-and-drop ordering
