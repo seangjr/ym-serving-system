@@ -1,8 +1,9 @@
 import { format, parseISO } from "date-fns";
-import { ArrowLeft, FileText, Music, Users } from "lucide-react";
+import { ArrowLeft, ArrowLeftRight, FileText, Music, Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { SwapApprovalList } from "@/components/assignments/swap-approval-list";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,6 +13,7 @@ import {
   getUnavailableMembersForService,
 } from "@/lib/assignments/queries";
 import { getUserRole, isAdminOrCommittee } from "@/lib/auth/roles";
+import { getSwapRequestsForService } from "@/lib/notifications/queries";
 import { getServiceById, getServiceTypes } from "@/lib/services/queries";
 import { createClient } from "@/lib/supabase/server";
 import { AssignmentPanel } from "./assignment-panel";
@@ -32,12 +34,13 @@ export default async function ServiceDetailPage({
 
   const supabase = await createClient();
   const [
-    { role },
+    { role, memberId },
     service,
     serviceTypes,
     assignmentGroups,
     allTeams,
     unavailableMembers,
+    pendingSwapRequests,
   ] = await Promise.all([
     getUserRole(supabase),
     getServiceById(serviceId),
@@ -45,11 +48,31 @@ export default async function ServiceDetailPage({
     getServiceAssignments(serviceId),
     getTeamsForAssignment(),
     getUnavailableMembersForService(serviceId),
+    getSwapRequestsForService(serviceId),
   ]);
 
   if (!service) notFound();
 
   const canManage = isAdminOrCommittee(role);
+
+  // Determine if user can see swap approvals (admin, committee, or team lead)
+  let canApproveSwaps = canManage;
+  if (!canApproveSwaps && memberId) {
+    // Check if user is a team lead for any team in this service
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const admin = createAdminClient();
+    const teamIds = [...new Set(assignmentGroups.map((g) => g.teamId))];
+    if (teamIds.length > 0) {
+      const { data: leadCheck } = await admin
+        .from("team_members")
+        .select("team_id")
+        .eq("member_id", memberId)
+        .eq("role", "lead")
+        .in("team_id", teamIds)
+        .limit(1);
+      canApproveSwaps = (leadCheck?.length ?? 0) > 0;
+    }
+  }
 
   // Fetch eligible members (with conflict info) for each team that has positions
   const teamIdsWithPositions = [
@@ -251,6 +274,20 @@ export default async function ServiceDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      {/* Pending swap requests (visible to admin/committee/team lead) */}
+      {canApproveSwaps && pendingSwapRequests.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <ArrowLeftRight className="size-5" />
+            Pending Swap Requests
+            <Badge variant="secondary" className="ml-1">
+              {pendingSwapRequests.length}
+            </Badge>
+          </h2>
+          <SwapApprovalList swapRequests={pendingSwapRequests} />
+        </div>
+      )}
 
       {/* Assignment panel */}
       <div className="flex flex-col gap-4">
