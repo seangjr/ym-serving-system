@@ -134,6 +134,10 @@ Recent decisions affecting current work:
 - [06-02]: AssignmentResponseButtons use optimistic state via useState + useTransition for instant visual feedback
 - [06-02]: Status badge reuses Phase 4 color convention: amber-pending, green-confirmed, red-declined
 - [06-02]: Active state on buttons: confirmed shows solid green check, declined shows solid red X
+- [06-03]: Optimistic UI updates for markAsRead/markAllRead with revert on error
+- [06-03]: Notification failures in assignMember/unassignMember wrapped in try/catch (never break assignment flow)
+- [06-03]: Sticky header bar with backdrop-blur for bell icon placement (consistent across all pages)
+- [06-03]: NotificationContextProvider only rendered when memberId exists (graceful fallback for edge cases)
 - [06-05]: pg_cron extension CREATE wrapped in DO block with exception handling for graceful fallback
 - [06-05]: API route authenticates via CRON_SECRET or SUPABASE_SERVICE_ROLE_KEY Bearer token
 - [06-05]: generate_service_reminders uses SECURITY DEFINER to bypass RLS for cross-member notification inserts
