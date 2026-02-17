@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 Phase: 6 of 10 (Accept/Decline & Notifications)
 Plan: 5 of 5 completed in current phase
 Status: Phase Complete
-Last activity: 2026-02-17 -- Completed 06-05 reminder system (pg_cron + API route)
+Last activity: 2026-02-17 -- Completed 06-04 swap request workflow (was skipped, now executed)
 
 Progress: [████████████████████████████████████████████████████████░] 57%
 
@@ -32,10 +32,10 @@ Progress: [███████████████████████
 | 03-services-and-calendar | 3/3 | 11min | 4min |
 | 04-scheduling-and-assignments | 3/3 | 17min | 6min |
 | 05-availability-management | 3/3 | 17min | 6min |
-| 06-accept-decline-and-notifications | 5/5 | 12min | 2min |
+| 06-accept-decline-and-notifications | 5/5 | 16min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 06-01 (3min), 06-02 (3min), 06-03 (2min), 06-04 (2min), 06-05 (2min)
+- Last 5 plans: 06-02 (3min), 06-03 (2min), 06-04 (4min), 06-04-redo (4min), 06-05 (2min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -141,6 +141,10 @@ Recent decisions affecting current work:
 - [06-05]: pg_cron extension CREATE wrapped in DO block with exception handling for graceful fallback
 - [06-05]: API route authenticates via CRON_SECRET or SUPABASE_SERVICE_ROLE_KEY Bearer token
 - [06-05]: generate_service_reminders uses SECURITY DEFINER to bypass RLS for cross-member notification inserts
+- [06-04]: Pre-arranged swap model: target member selected at creation, no in-system acceptance from target
+- [06-04]: Race condition protection on swap approval: atomic UPDATE WHERE status='pending' with rowCount check
+- [06-04]: Swap button on assignment card; "Swap Pending" badge replaces button when active swap exists
+- [06-04]: fetchTeamMembersForSwap uses dynamic import to cross server-only boundary (consistent with fetchTeamAvailability)
 
 ### Pending Todos
 
@@ -154,5 +158,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 06-05-PLAN.md (Phase 6 complete)
+Stopped at: Completed 06-04-PLAN.md (swap request workflow - was previously skipped)
 Resume file: None
