@@ -33,6 +33,7 @@ Team leads and admins can manage a song library and build per-service setlists w
 
 ### Song metadata & tags
 - Tags are free-form — type any tag when adding a song, tags accumulate organically
+- Tags subsume "themes" (SONG-02) — no separate themes field; worship themes are just tags (e.g., "praise", "worship", "thanksgiving")
 - Musical keys are free text (e.g., "C", "Bb", "F#m") — flexible for different notations
 - Tempo (BPM) is important — always filled, show prominently, recommended field
 - Multiple link slots per song — each with a label (YouTube, Spotify, chord chart, etc.)
