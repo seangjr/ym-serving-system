@@ -83,7 +83,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SONG-01**: Admin/team lead can add songs to a library with title, artist, key, and tempo
 - [x] **SONG-02**: Songs support tags, themes, and duration metadata
 - [x] **SONG-03**: Team lead can build a setlist for a service by selecting songs from the library
-- [ ] **SONG-04**: Setlist supports drag-and-drop reordering
+- [x] **SONG-04**: Setlist supports drag-and-drop reordering
 - [x] **SONG-05**: Song key and tempo can be overridden per service (without changing the library entry)
 - [x] **SONG-06**: Song library is searchable and filterable
 - [x] **SONG-07**: Dashboard shows song count per service
@@ -244,7 +244,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SONG-01 | Phase 7 | Complete |
 | SONG-02 | Phase 7 | Complete |
 | SONG-03 | Phase 7 | Complete |
-| SONG-04 | Phase 7 | Pending |
+| SONG-04 | Phase 7 | Complete |
 | SONG-05 | Phase 7 | Complete |
 | SONG-06 | Phase 7 | Complete |
 | SONG-07 | Phase 7 | Complete |
