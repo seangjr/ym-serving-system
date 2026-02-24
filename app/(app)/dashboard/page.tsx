@@ -10,6 +10,7 @@ import {
   getServiceTypes,
   getUpcomingServices,
 } from "@/lib/services/queries";
+import { getSongCountsForServices } from "@/lib/songs/queries";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardActions } from "./dashboard-actions";
 import { DashboardCalendar } from "./dashboard-calendar";
@@ -37,6 +38,10 @@ export default async function DashboardPage() {
       isAdminUser ? getAllServiceTypes() : Promise.resolve([]),
     ]);
 
+  // Fetch song counts for upcoming services
+  const upcomingServiceIds = upcoming.map((s) => s.id);
+  const songCounts = await getSongCountsForServices(upcomingServiceIds);
+
   // Transform services for calendar display
   const calendarServices: CalendarService[] = monthServices.map((s) => ({
     id: s.id,
@@ -62,6 +67,7 @@ export default async function DashboardPage() {
         }
       : undefined,
     isCancelled: s.is_cancelled,
+    songCount: songCounts[s.id] ?? 0,
   }));
 
   const serviceTypesList = serviceTypes.map((t) => ({

@@ -1,7 +1,7 @@
 "use client";
 
 import { format, parseISO } from "date-fns";
-import { Copy, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Copy, MoreHorizontal, Music, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ interface ServiceListService {
   endTime?: string;
   serviceType?: { id: string; name: string; label: string; color: string };
   isCancelled: boolean;
+  songCount?: number;
 }
 
 interface ServiceListProps {
@@ -124,7 +125,14 @@ export function ServiceList({
                 </Badge>
               )}
 
-              {/* Assignment counts will be added in a future update */}
+              {/* Song count */}
+              {service.songCount != null && service.songCount > 0 && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Music className="size-3" />
+                  {service.songCount}{" "}
+                  {service.songCount === 1 ? "song" : "songs"}
+                </span>
+              )}
             </div>
 
             {canManage && (
