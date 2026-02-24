@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Scheduling & Assignments** - Assigning members to positions with conflict detection and templates
 - [x] **Phase 5: Availability Management** - Member blackout dates, recurring unavailability, and scheduling warnings
 - [x] **Phase 6: Accept/Decline & Notifications** - Assignment response workflow, swap requests, and in-app notification system
-- [ ] **Phase 7: Song Library & Setlists** - Song management, setlist building with drag-and-drop, per-service overrides
+- [x] **Phase 7: Song Library & Setlists** - Song management, setlist building with drag-and-drop, per-service overrides
 - [ ] **Phase 8: Announcements & Service Communication** - Team announcements and per-service messaging threads
 - [ ] **Phase 9: Equipment & Files** - Equipment inventory tracking and file management for sheet music and documents
 - [ ] **Phase 10: Reports & UX Polish** - Participation/song analytics, undo/redo, mobile polish, and dashboard attention indicators
@@ -147,9 +147,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 07-01-PLAN.md -- Songs database schema (songs + setlist_items tables, GIN index, RLS) and complete lib/songs module (types, schemas, queries, actions)
-- [ ] 07-02-PLAN.md -- Song library UI: dense table with search, filter chips, CRUD dialog with tags and links
-- [ ] 07-03-PLAN.md -- Setlist builder: tabbed service detail, dnd-kit reordering, inline overrides, song picker, browse dialog, dashboard song counts
+- [x] 07-01-PLAN.md -- Songs database schema (songs + setlist_items tables, GIN index, RLS) and complete lib/songs module (types, schemas, queries, actions)
+- [x] 07-02-PLAN.md -- Song library UI: dense table with search, filter chips, CRUD dialog with tags and links
+- [x] 07-03-PLAN.md -- Setlist builder: tabbed service detail, dnd-kit reordering, inline overrides, song picker, browse dialog, dashboard song counts
 
 ### Phase 8: Announcements & Service Communication
 **Goal**: Team leads can broadcast announcements and teams can communicate within service contexts
@@ -216,7 +216,7 @@ Note: Phases 3, 7, 8, 9 depend only on Phase 1 and can be parallelized after Pha
 | 4. Scheduling & Assignments | 3/3 | ✓ Complete | 2026-02-14 |
 | 5. Availability Management | 3/3 | ✓ Complete | 2026-02-15 |
 | 6. Accept/Decline & Notifications | 5/5 | ✓ Complete | 2026-02-17 |
-| 7. Song Library & Setlists | 0/3 | Not started | - |
+| 7. Song Library & Setlists | 3/3 | ✓ Complete | 2026-02-24 |
 | 8. Announcements & Service Communication | 0/3 | Not started | - |
 | 9. Equipment & Files | 0/3 | Not started | - |
 | 10. Reports & UX Polish | 0/5 | Not started | - |
