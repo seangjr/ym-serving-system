@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Team leaders can schedule members to positions for upcoming services, and team members can see their assignments, confirm/decline, and manage their availability.
-**Current focus:** Phase 6 - Accept/Decline & Notifications
+**Current focus:** Phase 7 - Song Library & Setlists
 
 ## Current Position
 
-Phase: 6 of 10 (Accept/Decline & Notifications)
-Plan: 5 of 5 completed in current phase
-Status: Phase Complete
-Last activity: 2026-02-17 -- Completed 06-04 swap request workflow (was skipped, now executed)
+Phase: 7 of 10 (Song Library & Setlists)
+Plan: 1 of 3 completed in current phase
+Status: In Progress
+Last activity: 2026-02-24 -- Completed 07-01 songs & setlists data layer
 
-Progress: [████████████████████████████████████████████████████████░] 57%
+Progress: [██████████████████████████████████████████████████████████░░] 59%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 26
+- Total plans completed: 27
 - Average duration: 4min
-- Total execution time: 1.82 hours
+- Total execution time: 1.87 hours
 
 **By Phase:**
 
@@ -33,9 +33,10 @@ Progress: [███████████████████████
 | 04-scheduling-and-assignments | 3/3 | 17min | 6min |
 | 05-availability-management | 3/3 | 17min | 6min |
 | 06-accept-decline-and-notifications | 5/5 | 16min | 3min |
+| 07-song-library-setlists | 1/3 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 06-02 (3min), 06-03 (2min), 06-04 (4min), 06-04-redo (4min), 06-05 (2min)
+- Last 5 plans: 06-03 (2min), 06-04 (4min), 06-04-redo (4min), 06-05 (2min), 07-01 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -145,6 +146,10 @@ Recent decisions affecting current work:
 - [06-04]: Race condition protection on swap approval: atomic UPDATE WHERE status='pending' with rowCount check
 - [06-04]: Swap button on assignment card; "Swap Pending" badge replaces button when active swap exists
 - [06-04]: fetchTeamMembersForSwap uses dynamic import to cross server-only boundary (consistent with fetchTeamAvailability)
+- [07-01]: Tags stored as text[] with GIN index rather than separate tags table -- simpler for expected scale
+- [07-01]: No UNIQUE constraint on (service_id, song_id) in setlist_items -- allows same song twice in a setlist
+- [07-01]: Song links stored as jsonb array of {label, url} objects for flexibility (YouTube, chord charts)
+- [07-01]: Sort order re-numbered sequentially after removal to prevent gaps in setlist ordering
 
 ### Pending Todos
 
@@ -157,6 +162,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-17
-Stopped at: Phase 6 complete -- all 5 plans executed, verification passed (30/30 must-haves)
+Last session: 2026-02-24
+Stopped at: Completed 07-01-PLAN.md (songs & setlists data layer)
 Resume file: None
