@@ -57,7 +57,9 @@ export const reorderSetlistSchema = z.object({
 export const updateSetlistItemOverridesSchema = z.object({
   itemId: z.string().uuid(),
   keyOverride: z.union([z.string().max(10), z.literal("")]).optional(),
-  tempoOverride: z.number().int().min(20).max(300).optional(),
+  tempoOverride: z
+    .union([z.number().int().min(20).max(300), z.null()])
+    .optional(),
   notes: optionalText(2000),
 });
 
