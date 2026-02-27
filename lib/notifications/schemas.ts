@@ -39,6 +39,10 @@ export const resolveSwapSchema = z.object({
   action: z.enum(["approved", "rejected"]),
 });
 
+export const cancelSwapSchema = z.object({
+  swapRequestId: z.string().uuid("Invalid swap request ID."),
+});
+
 // ---------------------------------------------------------------------------
 // Inferred types
 // ---------------------------------------------------------------------------
@@ -50,3 +54,4 @@ export type RespondToAssignmentInput = z.infer<
 >;
 export type RequestSwapInput = z.infer<typeof requestSwapSchema>;
 export type ResolveSwapInput = z.infer<typeof resolveSwapSchema>;
+export type CancelSwapInput = z.infer<typeof cancelSwapSchema>;

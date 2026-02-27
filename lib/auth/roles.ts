@@ -97,9 +97,10 @@ export interface NavItem {
   icon: string; // Lucide icon name
 }
 
-/** Admin and Committee see 9 navigation items. */
+/** Admin and Committee see 10 navigation items. */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { title: "Services", href: "/dashboard", icon: "Calendar" },
+  { title: "My Schedule", href: "/my-schedule", icon: "CalendarCheck" },
   { title: "Teams", href: "/teams", icon: "Layers" },
   { title: "Team Roster", href: "/team-roster", icon: "Users" },
   { title: "Availability", href: "/availability", icon: "CalendarOff" },

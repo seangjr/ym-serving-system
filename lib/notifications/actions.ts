@@ -11,6 +11,7 @@ import {
   respondToAssignmentSchema,
   requestSwapSchema,
   resolveSwapSchema,
+  cancelSwapSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -139,6 +140,16 @@ export async function respondToAssignment(
     .eq("id", parsed.data.assignmentId);
 
   if (error) return { error: error.message };
+
+  // Auto-cancel any pending swap requests for this assignment
+  await admin
+    .from("swap_requests")
+    .update({
+      status: "cancelled",
+      resolved_at: new Date().toISOString(),
+    })
+    .eq("assignment_id", parsed.data.assignmentId)
+    .eq("status", "pending");
 
   // On decline, notify the team lead
   if (parsed.data.status === "declined") {
@@ -286,6 +297,44 @@ export async function requestSwap(
 
   if (insertError) return { error: insertError.message };
 
+  // Get names for notifications
+  const { data: callerMember } = await admin
+    .from("members")
+    .select("full_name")
+    .eq("id", callerId)
+    .single();
+
+  const { data: targetMember } = await admin
+    .from("members")
+    .select("full_name")
+    .eq("id", parsed.data.targetMemberId)
+    .single();
+
+  const requesterName = callerMember?.full_name ?? "A member";
+  const targetName = targetMember?.full_name ?? "a team member";
+  const positionName = sp.team_positions?.name ?? "a position";
+  const serviceTitle = sp.services.title;
+  const formattedDate = new Date(
+    `${sp.services.service_date}T00:00:00`,
+  ).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  // Notify target member
+  try {
+    await createNotification({
+      recipientMemberId: parsed.data.targetMemberId,
+      type: "swap_requested",
+      title: "Swap Request",
+      body: `${requesterName} wants to swap ${positionName} with you for ${serviceTitle} on ${formattedDate}`,
+      metadata: {
+        assignmentId: parsed.data.assignmentId,
+        serviceId: sp.services.id,
+      },
+      actionUrl: "/my-schedule",
+    });
+  } catch {
+    // Non-blocking
+  }
+
   // Notify team lead(s)
   const { data: leads } = await admin
     .from("team_members")
@@ -294,23 +343,6 @@ export async function requestSwap(
     .eq("role", "lead");
 
   if (leads && leads.length > 0) {
-    const { data: callerMember } = await admin
-      .from("members")
-      .select("full_name")
-      .eq("id", callerId)
-      .single();
-
-    const { data: targetMember } = await admin
-      .from("members")
-      .select("full_name")
-      .eq("id", parsed.data.targetMemberId)
-      .single();
-
-    const requesterName = callerMember?.full_name ?? "A member";
-    const targetName = targetMember?.full_name ?? "a team member";
-    const positionName = sp.team_positions?.name ?? "a position";
-    const serviceTitle = sp.services.title;
-
     for (const lead of leads) {
       try {
         await createNotification({
@@ -507,6 +539,56 @@ export async function resolveSwap(
   }
 
   revalidatePath(`/services/${serviceId}`);
+  revalidatePath("/my-schedule");
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// cancelSwap — requester cancels their own pending swap request
+// ---------------------------------------------------------------------------
+
+export async function cancelSwap(
+  data: unknown,
+): Promise<{ success: true } | { error: string }> {
+  const supabase = await createClient();
+  const { memberId: callerId } = await getUserRole(supabase);
+
+  if (!callerId) return { error: "Not authenticated." };
+
+  const parsed = cancelSwapSchema.safeParse(data);
+  if (!parsed.success) {
+    return {
+      error: parsed.error.issues[0]?.message ?? "Invalid data.",
+    };
+  }
+
+  const admin = createAdminClient();
+
+  // Verify ownership and pending status
+  const { data: swap } = await admin
+    .from("swap_requests")
+    .select("id, requester_member_id, status, assignment_id")
+    .eq("id", parsed.data.swapRequestId)
+    .single();
+
+  if (!swap) return { error: "Swap request not found." };
+  if (swap.requester_member_id !== callerId) {
+    return { error: "You can only cancel your own swap requests." };
+  }
+  if (swap.status !== "pending") {
+    return { error: "Only pending swap requests can be cancelled." };
+  }
+
+  const { error: cancelError } = await admin
+    .from("swap_requests")
+    .update({
+      status: "cancelled",
+      resolved_at: new Date().toISOString(),
+    })
+    .eq("id", parsed.data.swapRequestId);
+
+  if (cancelError) return { error: cancelError.message };
+
   revalidatePath("/my-schedule");
   return { success: true };
 }

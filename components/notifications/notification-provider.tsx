@@ -51,67 +51,98 @@ export function NotificationContextProvider({
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
   const [isLoading] = useState(false);
   const router = useRouter();
-  const supabaseRef = useRef(createClient());
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
 
-  // Supabase Realtime subscription
+  // Lazy-init the Supabase client (avoids calling createClient on every render)
+  function getSupabase() {
+    if (!supabaseRef.current) {
+      supabaseRef.current = createClient();
+    }
+    return supabaseRef.current;
+  }
+
+  // Supabase Realtime subscription — wait for auth before subscribing
   useEffect(() => {
-    const supabase = supabaseRef.current;
+    const supabase = getSupabase();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    const channel = supabase
-      .channel(`notifications:${memberId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter: `recipient_member_id=eq.${memberId}`,
-        },
-        (payload) => {
-          const row = payload.new as Record<string, unknown>;
+    function subscribe() {
+      channel = supabase
+        .channel(`notifications:${memberId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: `recipient_member_id=eq.${memberId}`,
+          },
+          (payload) => {
+            const row = payload.new as Record<string, unknown>;
 
-          const newNotification: Notification = {
-            id: row.id as string,
-            recipientMemberId: row.recipient_member_id as string,
-            type: row.type as Notification["type"],
-            title: row.title as string,
-            body: row.body as string,
-            metadata: (row.metadata as Record<string, unknown>) ?? {},
-            actionUrl: (row.action_url as string) ?? null,
-            isRead: row.is_read as boolean,
-            createdAt: row.created_at as string,
-          };
+            const newNotification: Notification = {
+              id: row.id as string,
+              recipientMemberId: row.recipient_member_id as string,
+              type: row.type as Notification["type"],
+              title: row.title as string,
+              body: row.body as string,
+              metadata: (row.metadata as Record<string, unknown>) ?? {},
+              actionUrl: (row.action_url as string) ?? null,
+              isRead: row.is_read as boolean,
+              createdAt: row.created_at as string,
+            };
 
-          // Prepend to list and increment unread
-          setNotifications((prev) => [newNotification, ...prev]);
-          setUnreadCount((prev) => prev + 1);
+            // Prepend to list and increment unread
+            setNotifications((prev) => [newNotification, ...prev]);
+            setUnreadCount((prev) => prev + 1);
 
-          // Show sonner toast
-          const truncatedBody =
-            newNotification.body.length > 80
-              ? `${newNotification.body.slice(0, 80)}...`
-              : newNotification.body;
+            // Show sonner toast
+            const truncatedBody =
+              newNotification.body.length > 80
+                ? `${newNotification.body.slice(0, 80)}...`
+                : newNotification.body;
 
-          toast(newNotification.title, {
-            description: truncatedBody,
-            duration: 5000,
-            action: newNotification.actionUrl
-              ? {
-                  label: "View",
-                  onClick: () => {
-                    router.push(newNotification.actionUrl!);
-                  },
-                }
-              : undefined,
-          });
-        },
-      )
-      .subscribe();
+            toast(newNotification.title, {
+              description: truncatedBody,
+              duration: 5000,
+              action: newNotification.actionUrl
+                ? {
+                    label: "View",
+                    onClick: () => {
+                      router.push(newNotification.actionUrl!);
+                    },
+                  }
+                : undefined,
+            });
+          },
+        )
+        .subscribe();
+    }
+
+    // Ensure we have a session before subscribing
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        subscribe();
+      }
+    });
+
+    // Re-subscribe when auth state changes (e.g., token refresh)
+    const {
+      data: { subscription: authSub },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session && !channel) {
+        subscribe();
+      }
+    });
 
     return () => {
-      supabase.removeChannel(channel);
+      authSub.unsubscribe();
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
-  }, [memberId, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memberId]);
 
   // markAsRead
   const markAsRead = useCallback(async (notificationId: string) => {

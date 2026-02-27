@@ -64,6 +64,19 @@ export interface SwapRequest {
 // My Schedule types
 // ---------------------------------------------------------------------------
 
+/** An incoming swap request shown on the target member's My Schedule page. */
+export interface IncomingSwapRequest {
+  id: string;
+  requesterName: string;
+  positionName: string;
+  teamName: string;
+  serviceTitle: string;
+  serviceDate: string;
+  startTime: string;
+  reason: string | null;
+  createdAt: string;
+}
+
 /** An assignment shown on the My Schedule page. */
 export interface MyAssignment {
   id: string;

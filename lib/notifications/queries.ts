@@ -3,7 +3,12 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getUserRole } from "@/lib/auth/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { MyAssignment, Notification, SwapRequest } from "./types";
+import type {
+  IncomingSwapRequest,
+  MyAssignment,
+  Notification,
+  SwapRequest,
+} from "./types";
 
 // ---------------------------------------------------------------------------
 // Notification queries (RLS-protected client)
@@ -86,17 +91,33 @@ export async function getMyAssignments(): Promise<MyAssignment[]> {
         service_id,
         services!inner(id, title, service_date, start_time, end_time),
         team_positions(name),
-        serving_teams!inner(name, color)
+        serving_teams!service_positions_team_id_fkey(name, color)
       )
     `,
     )
     .eq("member_id", memberId)
-    .gte("service_positions.services.service_date", today)
-    .order("service_positions(services(service_date))", { ascending: true });
+    .gte("service_positions.services.service_date", today);
 
   if (error) throw error;
 
-  return (data ?? []).map((row) => {
+  // Sort in JS — PostgREST doesn't support deeply nested ordering
+  const sorted = (data ?? []).sort((a, b) => {
+    const spA = a.service_positions as unknown as {
+      services: { service_date: string; start_time: string };
+    };
+    const spB = b.service_positions as unknown as {
+      services: { service_date: string; start_time: string };
+    };
+    const dateCompare = spA.services.service_date.localeCompare(
+      spB.services.service_date,
+    );
+    if (dateCompare !== 0) return dateCompare;
+    return (spA.services.start_time ?? "").localeCompare(
+      spB.services.start_time ?? "",
+    );
+  });
+
+  return sorted.map((row) => {
     const sp = row.service_positions as unknown as {
       service_id: string;
       services: {
@@ -391,7 +412,68 @@ export async function getActiveSwapForAssignment(
 }
 
 /**
- * Get team members eligible for swap (everyone on the same team except the current member).
+ * Fetch pending swap requests where the current user is the target.
+ * Shown on the My Schedule page so the target member is aware of incoming swaps.
+ */
+export async function getIncomingSwapRequests(): Promise<IncomingSwapRequest[]> {
+  const supabase = await createClient();
+  const { memberId } = await getUserRole(supabase);
+
+  if (!memberId) return [];
+
+  const admin = createAdminClient();
+
+  const { data, error } = await admin
+    .from("swap_requests")
+    .select(
+      `
+      id,
+      reason,
+      created_at,
+      requester:members!requester_member_id(full_name),
+      service_assignments!inner(
+        service_positions!inner(
+          services!inner(title, service_date, start_time),
+          team_positions(name),
+          serving_teams!service_positions_team_id_fkey(name)
+        )
+      )
+    `,
+    )
+    .eq("target_member_id", memberId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return (data ?? []).map((row) => {
+    const sa = row.service_assignments as unknown as {
+      service_positions: {
+        services: { title: string; service_date: string; start_time: string };
+        team_positions: { name: string } | null;
+        serving_teams: { name: string };
+      };
+    };
+
+    return {
+      id: row.id,
+      requesterName:
+        (row.requester as unknown as { full_name: string } | null)
+          ?.full_name ?? "Unknown",
+      positionName: sa.service_positions.team_positions?.name ?? "Unknown",
+      teamName: sa.service_positions.serving_teams.name,
+      serviceTitle: sa.service_positions.services.title,
+      serviceDate: sa.service_positions.services.service_date,
+      startTime: sa.service_positions.services.start_time,
+      reason: row.reason,
+      createdAt: row.created_at,
+    };
+  });
+}
+
+/**
+ * Get team members eligible for swap — only those who have a skill for the
+ * same position as the assignment (e.g., only Bassists can swap with Bassists).
  * Used to populate the swap partner dropdown.
  */
 export async function getTeamMembersForSwap(
@@ -400,13 +482,14 @@ export async function getTeamMembersForSwap(
 ): Promise<{ id: string; fullName: string }[]> {
   const admin = createAdminClient();
 
-  // Find the team for this assignment's position
+  // Find the team_id and position_id for this assignment
   const { data: assignment } = await admin
     .from("service_assignments")
     .select(
       `
       service_positions!inner(
-        team_id
+        team_id,
+        position_id
       )
     `,
     )
@@ -415,32 +498,43 @@ export async function getTeamMembersForSwap(
 
   if (!assignment) return [];
 
-  const teamId = (
-    assignment.service_positions as unknown as { team_id: string }
-  ).team_id;
+  const sp = assignment.service_positions as unknown as {
+    team_id: string;
+    position_id: string;
+  };
 
-  // Get all team members except the current member
-  const { data: teamMembers, error } = await admin
-    .from("team_members")
+  // Get members who: are on the same team, have a skill for this position, and are not the current member
+  const { data: skillMembers, error } = await admin
+    .from("member_position_skills")
     .select(
       `
       member_id,
       members!inner(id, full_name)
     `,
     )
-    .eq("team_id", teamId)
+    .eq("position_id", sp.position_id)
     .neq("member_id", currentMemberId);
 
   if (error) throw error;
 
-  return (teamMembers ?? []).map((tm) => {
-    const member = tm.members as unknown as {
-      id: string;
-      full_name: string;
-    };
-    return {
-      id: member.id,
-      fullName: member.full_name,
-    };
-  });
+  // Also verify they are on the same team
+  const { data: teamMemberIds } = await admin
+    .from("team_members")
+    .select("member_id")
+    .eq("team_id", sp.team_id);
+
+  const teamSet = new Set((teamMemberIds ?? []).map((tm) => tm.member_id));
+
+  return (skillMembers ?? [])
+    .filter((sm) => teamSet.has(sm.member_id))
+    .map((sm) => {
+      const member = sm.members as unknown as {
+        id: string;
+        full_name: string;
+      };
+      return {
+        id: member.id,
+        fullName: member.full_name,
+      };
+    });
 }

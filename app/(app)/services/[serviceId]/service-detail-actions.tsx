@@ -83,7 +83,7 @@ export function ServiceDetailActions({
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           variant="outline"
           size="sm"
@@ -91,7 +91,7 @@ export function ServiceDetailActions({
           disabled={isPending}
         >
           <Pencil className="size-4" />
-          Edit
+          <span className="hidden sm:inline">Edit</span>
         </Button>
         <Button
           variant="outline"
@@ -100,7 +100,7 @@ export function ServiceDetailActions({
           disabled={isPending}
         >
           <Copy className="size-4" />
-          Duplicate
+          <span className="hidden sm:inline">Duplicate</span>
         </Button>
         <Button
           variant="outline"
@@ -109,7 +109,7 @@ export function ServiceDetailActions({
           disabled={isPending}
         >
           <Save className="size-4" />
-          Save as Template
+          <span className="hidden sm:inline">Save as Template</span>
         </Button>
         <Button
           variant="outline"
@@ -118,13 +118,13 @@ export function ServiceDetailActions({
           disabled={isPending}
         >
           <Upload className="size-4" />
-          Load Template
+          <span className="hidden sm:inline">Load Template</span>
         </Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="outline" size="sm" disabled={isPending}>
               <Trash2 className="size-4 text-destructive" />
-              Delete
+              <span className="hidden sm:inline">Delete</span>
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
