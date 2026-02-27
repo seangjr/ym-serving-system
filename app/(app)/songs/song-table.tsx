@@ -7,7 +7,9 @@ import {
   MoreHorizontal,
   Music,
   Pencil,
+  Search,
   Trash2,
+  X,
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -39,6 +41,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import { deleteSong } from "@/lib/songs/actions";
 import type { SongSummary } from "@/lib/songs/types";
 import { SongFormDialog } from "./song-form-dialog";
@@ -104,6 +107,7 @@ export function SongTable({ songs, canManage }: SongTableProps) {
   const [editingSong, setEditingSong] = useState<SongSummary | null>(null);
   const [deletingSong, setDeletingSong] = useState<SongSummary | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Sort state
   const [sortField, setSortField] = useState<SortField | null>(null);
@@ -121,10 +125,21 @@ export function SongTable({ songs, canManage }: SongTableProps) {
     }
   }
 
-  const sortedSongs = useMemo(() => {
-    if (!sortField) return songs;
+  // Client-side search filter (instant)
+  const filteredSongs = useMemo(() => {
+    if (!searchQuery.trim()) return songs;
+    const q = searchQuery.toLowerCase();
+    return songs.filter(
+      (s) =>
+        s.title.toLowerCase().includes(q) ||
+        (s.artist && s.artist.toLowerCase().includes(q)),
+    );
+  }, [songs, searchQuery]);
 
-    return [...songs].sort((a, b) => {
+  const sortedSongs = useMemo(() => {
+    if (!sortField) return filteredSongs;
+
+    return [...filteredSongs].sort((a, b) => {
       const dir = sortDir === "asc" ? 1 : -1;
 
       switch (sortField) {
@@ -152,7 +167,7 @@ export function SongTable({ songs, canManage }: SongTableProps) {
           return 0;
       }
     });
-  }, [songs, sortField, sortDir]);
+  }, [filteredSongs, sortField, sortDir]);
 
   function handleDelete() {
     if (!deletingSong) return;
@@ -181,6 +196,30 @@ export function SongTable({ songs, canManage }: SongTableProps) {
 
   return (
     <>
+      {/* Instant search */}
+      <div className="relative w-full max-w-sm">
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Search by title or artist..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 pr-9"
+        />
+        {searchQuery && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className="absolute right-2 top-1/2 -translate-y-1/2"
+            onClick={() => setSearchQuery("")}
+            aria-label="Clear search"
+          >
+            <X className="size-4" />
+          </Button>
+        )}
+      </div>
+
       {/* Desktop: table layout */}
       <div className="hidden md:block">
         <Card className="border-0 shadow-sm">
@@ -261,7 +300,7 @@ export function SongTable({ songs, canManage }: SongTableProps) {
 
       {/* Mobile: card grid */}
       <div className="grid grid-cols-1 gap-3 md:hidden">
-        {songs.map((song) => (
+        {sortedSongs.map((song) => (
           <Card key={song.id} className="shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-start justify-between gap-2">

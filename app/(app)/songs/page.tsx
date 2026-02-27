@@ -4,9 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { getUserRole, isAdminOrCommittee } from "@/lib/auth/roles";
 import { getDistinctKeys, getPopularTags, getSongs } from "@/lib/songs/queries";
 import { createClient } from "@/lib/supabase/server";
+import { AddSongButton } from "./add-song-button";
 import { SongFilters } from "./song-filters";
-import { SongSearch } from "./song-search";
-import { SongTableWrapper } from "./song-table-wrapper";
+import { SongTable } from "./song-table";
 
 // ---------------------------------------------------------------------------
 // Metadata
@@ -23,10 +23,9 @@ export const metadata = {
 export default async function SongLibraryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; key?: string; tag?: string }>;
+  searchParams: Promise<{ key?: string; tag?: string }>;
 }) {
   const params = await searchParams;
-  const searchQuery = params.q ?? "";
   const keyFilter = params.key ?? "";
   const tagFilter = params.tag ?? "";
 
@@ -34,9 +33,9 @@ export default async function SongLibraryPage({
   const { role } = await getUserRole(supabase);
   const canManage = isAdminOrCommittee(role);
 
+  // Search is handled client-side for instant filtering; server filters key/tag only
   const [songs, popularTags, distinctKeys] = await Promise.all([
     getSongs({
-      search: searchQuery || undefined,
       key: keyFilter || undefined,
       tag: tagFilter || undefined,
     }),
@@ -46,7 +45,7 @@ export default async function SongLibraryPage({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header + Add Song button (managed by SongTableWrapper for dialog state) */}
+      {/* Header */}
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <Music className="size-5 text-muted-foreground" />
@@ -60,12 +59,8 @@ export default async function SongLibraryPage({
         </p>
       </div>
 
-      {/* Search + Filters (same row) */}
+      {/* Filters + Add Song (same row) */}
       <div className="flex flex-wrap items-center gap-3">
-        <Suspense fallback={null}>
-          <SongSearch defaultValue={searchQuery} />
-        </Suspense>
-
         <Suspense fallback={null}>
           <SongFilters
             distinctKeys={distinctKeys}
@@ -74,10 +69,16 @@ export default async function SongLibraryPage({
             activeTag={tagFilter || undefined}
           />
         </Suspense>
+
+        {canManage && (
+          <div className="ml-auto">
+            <AddSongButton />
+          </div>
+        )}
       </div>
 
-      {/* Song table with Add Song button + dialog (client component) */}
-      <SongTableWrapper songs={songs} canManage={canManage} />
+      {/* Song table with integrated instant search */}
+      <SongTable songs={songs} canManage={canManage} />
     </div>
   );
 }
