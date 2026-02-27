@@ -1,7 +1,15 @@
 "use client";
 
-import { MoreHorizontal, Music, Pencil, Trash2 } from "lucide-react";
-import { useState, useTransition } from "react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  MoreHorizontal,
+  Music,
+  Pencil,
+  Trash2,
+} from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import {
@@ -36,12 +44,56 @@ import type { SongSummary } from "@/lib/songs/types";
 import { SongFormDialog } from "./song-form-dialog";
 
 // ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+type SortField = "title" | "artist" | "key" | "tempo";
+type SortDir = "asc" | "desc";
+
+// ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
 interface SongTableProps {
   songs: SongSummary[];
   canManage: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Sortable header sub-component
+// ---------------------------------------------------------------------------
+
+function SortableHeader({
+  label,
+  field,
+  sortField,
+  sortDir,
+  onSort,
+  className,
+}: {
+  label: string;
+  field: SortField;
+  sortField: SortField | null;
+  sortDir: SortDir;
+  onSort: (field: SortField) => void;
+  className?: string;
+}) {
+  const isActive = sortField === field;
+
+  return (
+    <TableHead className={className}>
+      <button
+        type="button"
+        onClick={() => onSort(field)}
+        className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+      >
+        {label}
+        {!isActive && <ArrowUpDown className="size-3 opacity-40" />}
+        {isActive && sortDir === "asc" && <ArrowUp className="size-3" />}
+        {isActive && sortDir === "desc" && <ArrowDown className="size-3" />}
+      </button>
+    </TableHead>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -52,6 +104,55 @@ export function SongTable({ songs, canManage }: SongTableProps) {
   const [editingSong, setEditingSong] = useState<SongSummary | null>(null);
   const [deletingSong, setDeletingSong] = useState<SongSummary | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
+
+  // Sort state
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  function handleSort(field: SortField) {
+    if (sortField !== field) {
+      setSortField(field);
+      setSortDir("asc");
+    } else if (sortDir === "asc") {
+      setSortDir("desc");
+    } else {
+      setSortField(null);
+      setSortDir("asc");
+    }
+  }
+
+  const sortedSongs = useMemo(() => {
+    if (!sortField) return songs;
+
+    return [...songs].sort((a, b) => {
+      const dir = sortDir === "asc" ? 1 : -1;
+
+      switch (sortField) {
+        case "title":
+          return dir * a.title.localeCompare(b.title);
+        case "artist": {
+          if (!a.artist && !b.artist) return 0;
+          if (!a.artist) return 1;
+          if (!b.artist) return -1;
+          return dir * a.artist.localeCompare(b.artist);
+        }
+        case "key": {
+          if (!a.default_key && !b.default_key) return 0;
+          if (!a.default_key) return 1;
+          if (!b.default_key) return -1;
+          return dir * a.default_key.localeCompare(b.default_key);
+        }
+        case "tempo": {
+          if (a.default_tempo === null && b.default_tempo === null) return 0;
+          if (a.default_tempo === null) return 1;
+          if (b.default_tempo === null) return -1;
+          return dir * (a.default_tempo - b.default_tempo);
+        }
+        default:
+          return 0;
+      }
+    });
+  }, [songs, sortField, sortDir]);
 
   function handleDelete() {
     if (!deletingSong) return;
@@ -84,29 +185,61 @@ export function SongTable({ songs, canManage }: SongTableProps) {
       <div className="hidden md:block">
         <Card className="border-0 shadow-sm">
           <CardContent className="p-0">
-            <Table>
+            <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[280px]">Title</TableHead>
-                  <TableHead>Artist</TableHead>
-                  <TableHead className="w-[80px]">Key</TableHead>
-                  <TableHead className="w-[90px]">Tempo</TableHead>
-                  <TableHead>Tags</TableHead>
+                  <SortableHeader
+                    label="Title"
+                    field="title"
+                    sortField={sortField}
+                    sortDir={sortDir}
+                    onSort={handleSort}
+                    className="w-[280px] max-w-[280px]"
+                  />
+                  <SortableHeader
+                    label="Artist"
+                    field="artist"
+                    sortField={sortField}
+                    sortDir={sortDir}
+                    onSort={handleSort}
+                    className="w-[180px] max-w-[180px]"
+                  />
+                  <SortableHeader
+                    label="Key"
+                    field="key"
+                    sortField={sortField}
+                    sortDir={sortDir}
+                    onSort={handleSort}
+                    className="w-[80px]"
+                  />
+                  <SortableHeader
+                    label="Tempo"
+                    field="tempo"
+                    sortField={sortField}
+                    sortDir={sortDir}
+                    onSort={handleSort}
+                    className="w-[90px]"
+                  />
+                  <TableHead className="w-[200px] max-w-[200px]">
+                    Tags
+                  </TableHead>
                   {canManage && <TableHead className="w-[50px]" />}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {songs.map((song) => (
+                {sortedSongs.map((song) => (
                   <TableRow key={song.id}>
-                    <TableCell className="font-medium">{song.title}</TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="font-medium truncate max-w-[280px]">
+                      {song.title}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground truncate max-w-[180px]">
                       {song.artist || "--"}
                     </TableCell>
                     <TableCell>{song.default_key || "--"}</TableCell>
                     <TableCell>
                       {song.default_tempo ? `${song.default_tempo} BPM` : "--"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="overflow-hidden max-w-[200px]">
                       <TagBadges tags={song.tags} />
                     </TableCell>
                     {canManage && (
