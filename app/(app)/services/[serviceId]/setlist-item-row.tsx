@@ -21,6 +21,10 @@ interface SetlistItemRowProps {
   item: SetlistItemWithSong;
   index: number;
   canManage: boolean;
+  onOptimisticUpdate: (
+    itemId: string,
+    updates: { key_override?: string | null; tempo_override?: number | null },
+  ) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -134,6 +138,7 @@ export function SetlistItemRow({
   item,
   index,
   canManage,
+  onOptimisticUpdate,
 }: SetlistItemRowProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -159,16 +164,21 @@ export function SetlistItemRow({
   const tempoIsOverridden = item.tempo_override !== null;
 
   // -------------------------------------------------------------------------
-  // Handlers
+  // Handlers (with optimistic updates)
   // -------------------------------------------------------------------------
 
   function handleKeySave(val: string) {
+    // Optimistic: update parent state immediately
+    onOptimisticUpdate(item.id, { key_override: val });
+
     startTransition(async () => {
       const result = await updateSetlistItemOverrides({
         itemId: item.id,
         keyOverride: val,
       });
       if ("error" in result) {
+        // Revert on error
+        onOptimisticUpdate(item.id, { key_override: item.key_override });
         toast.error(result.error);
         return;
       }
@@ -180,12 +190,17 @@ export function SetlistItemRow({
     const num = Number.parseInt(val, 10);
     if (val === "" || Number.isNaN(num)) return;
 
+    // Optimistic: update parent state immediately
+    onOptimisticUpdate(item.id, { tempo_override: num });
+
     startTransition(async () => {
       const result = await updateSetlistItemOverrides({
         itemId: item.id,
         tempoOverride: num,
       });
       if ("error" in result) {
+        // Revert on error
+        onOptimisticUpdate(item.id, { tempo_override: item.tempo_override });
         toast.error(result.error);
         return;
       }
@@ -208,12 +223,17 @@ export function SetlistItemRow({
   }
 
   function handleResetKey() {
+    // Optimistic: clear key override immediately
+    onOptimisticUpdate(item.id, { key_override: null });
+
     startTransition(async () => {
       const result = await updateSetlistItemOverrides({
         itemId: item.id,
         keyOverride: "",
       });
       if ("error" in result) {
+        // Revert on error
+        onOptimisticUpdate(item.id, { key_override: item.key_override });
         toast.error(result.error);
         return;
       }
@@ -222,12 +242,17 @@ export function SetlistItemRow({
   }
 
   function handleResetTempo() {
+    // Optimistic: clear tempo override immediately
+    onOptimisticUpdate(item.id, { tempo_override: null });
+
     startTransition(async () => {
       const result = await updateSetlistItemOverrides({
         itemId: item.id,
         tempoOverride: null,
       });
       if ("error" in result) {
+        // Revert on error
+        onOptimisticUpdate(item.id, { tempo_override: item.tempo_override });
         toast.error(result.error);
         return;
       }
