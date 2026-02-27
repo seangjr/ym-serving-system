@@ -144,12 +144,13 @@ Plans:
   3. Team lead can build a setlist for a service by selecting songs from the library, with drag-and-drop reordering
   4. Song key and tempo can be overridden per service without changing the library entry
   5. Dashboard shows song count per service in the upcoming services list
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [x] 07-01-PLAN.md -- Songs database schema (songs + setlist_items tables, GIN index, RLS) and complete lib/songs module (types, schemas, queries, actions)
 - [x] 07-02-PLAN.md -- Song library UI: dense table with search, filter chips, CRUD dialog with tags and links
 - [x] 07-03-PLAN.md -- Setlist builder: tabbed service detail, dnd-kit reordering, inline overrides, song picker, browse dialog, dashboard song counts
+- [ ] 07-04-PLAN.md -- Gap closure: table column stability + sorting, compact filter popover, setlist optimistic UI
 
 ### Phase 8: Announcements & Service Communication
 **Goal**: Team leads can broadcast announcements and teams can communicate within service contexts
