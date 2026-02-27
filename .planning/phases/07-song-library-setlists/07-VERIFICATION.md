@@ -1,211 +1,151 @@
 ---
 phase: 07-song-library-setlists
-verified: 2026-02-24T09:45:00Z
+verified: 2026-02-27T06:58:00Z
 status: passed
-score: 13/13 must-haves verified
-re_verification: false
+score: 6/6 UAT gap truths verified
+re_verification:
+  previous_status: passed (initial, pre-UAT)
+  previous_score: 13/13
+  gaps_closed:
+    - "Song table columns have stable widths that do not shift as data grows"
+    - "Song table headers are clickable and sort the table client-side"
+    - "Filters use a compact Filters button with popover dropdowns instead of inline chips"
+    - "Active filters show as badges with X to clear"
+    - "Setlist drag-and-drop reorder reflects instantly in the UI before server confirms"
+    - "Setlist key/tempo overrides and resets reflect instantly in the UI before server confirms"
+  gaps_remaining: []
+  regressions: []
+human_verification:
+  - test: "Drag 3+ setlist songs — reorder should appear visually instant (no 2s delay)"
+    expected: "Song moves immediately on drag. Server syncs in background."
+    why_human: "Optimistic UI timing perception requires interactive testing"
+  - test: "Click a key/tempo value in setlist, change it. Should turn bold blue immediately."
+    expected: "No 3-7 second delay. Override appears instantly."
+    why_human: "Callback-based optimistic update timing requires interactive testing"
 ---
 
-# Phase 7: Song Library & Setlists Verification Report
+# Phase 7: Song Library & Setlists Verification Report (Re-verification after UAT Gap Closure)
 
 **Phase Goal:** Team leads can manage a song library and build service setlists with drag-and-drop ordering
-
-**Verified:** 2026-02-24T09:45:00Z
-
+**Verified:** 2026-02-27T06:58:00Z
 **Status:** passed
+**Re-verification:** Yes — after UAT gap closure (Plan 07-04, 3 commits on 2026-02-27)
 
-**Re-verification:** No — initial verification
+## Context
+
+The initial VERIFICATION.md (2026-02-24) passed 13/13 must-haves for the core phase. UAT conducted after that surfaced 6 minor UX issues across Tests 2, 4, 5, 10, 11, and 12. A gap closure plan (07-04) was created and executed on 2026-02-27. This re-verification checks whether all 6 UAT gaps were closed by verifying the actual codebase, not just the SUMMARY claims.
 
 ## Goal Achievement
 
-### Observable Truths
+### Observable Truths (UAT Gap Closure)
 
-Based on Success Criteria from ROADMAP.md:
+The 6 UAT issues were grouped into 6 truths for Plan 07-04:
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | Admin/team lead can add songs to the library with title, artist, key, tempo, tags, themes, and duration | ✓ VERIFIED | SongFormDialog renders all fields (title, artist, defaultKey, defaultTempo, tags, links, durationSeconds, notes). createSong server action validated with Zod and inserts into songs table. |
-| 2 | Song library is searchable by title/artist and filterable by key, tempo, or tags | ✓ VERIFIED | SongSearch debounces input and pushes to URL params. getSongs() supports ilike search on title/artist, eq filter on key, overlaps filter on tags. FilterChips render dynamic key/tag filters. |
-| 3 | Team lead can build a setlist for a service by selecting songs from the library, with drag-and-drop reordering | ✓ VERIFIED | SetlistPanel uses dnd-kit with SortableContext. SongPicker (inline search) and SongBrowseDialog allow adding songs. reorderSetlist server action persists new order. |
-| 4 | Song key and tempo can be overridden per service without changing the library entry | ✓ VERIFIED | SetlistItemRow renders InlineEdit for key_override and tempo_override. updateSetlistItemOverrides server action updates overrides. Overridden values displayed in bold + blue with reset button. |
-| 5 | Dashboard shows song count per service in the upcoming services list | ✓ VERIFIED | Dashboard page calls getSongCountsForServices, maps counts to service objects. ServiceList displays songCount with Music icon. |
+| 1 | Song table columns have stable widths that do not shift as data grows | VERIFIED | `table-fixed` on Table (line 188). `w-[280px] max-w-[280px]` on Title head; `w-[180px] max-w-[180px]` on Artist; `w-[200px] max-w-[200px]` on Tags. `truncate` on Title/Artist cells; `overflow-hidden` on Tags cell. |
+| 2 | Song table headers are clickable and sort the table client-side | VERIFIED | `SortableHeader` sub-component (lines 66-97) with `onClick={() => onSort(field)}`. Sort state: `sortField` + `sortDir` (lines 109-110). `useMemo`-based `sortedSongs` with `localeCompare` and nulls-last logic (lines 124-155). All 4 data columns wired to `SortableHeader`. |
+| 3 | Filters use a compact Filters button with popover dropdowns instead of inline chips | VERIFIED | `song-filters.tsx` created (184 lines). Renders `<Popover>` with `<Button variant="outline">Filters</Button>`. `<Select>` dropdowns for Key and Tag inside `<PopoverContent>`. Active count badge on button label (line 88). `FilterChips` no longer imported anywhere. |
+| 4 | Active filters show as badges with X to clear | VERIFIED | `song-filters.tsx` lines 161-181: `<Badge variant="secondary">` rendered for active key and active tag. Each badge has `<X className="size-3" />` with `onClick` calling `updateParam` to clear. |
+| 5 | Setlist drag-and-drop reorder reflects instantly in the UI before server confirms | VERIFIED | `setlist-panel.tsx`: `localItems` useState (line 56), `useEffect` sync (lines 59-61). `handleDragEnd` calls `setLocalItems(reordered)` (line 102) BEFORE `startTransition`. Error reverts to `items` (line 113). |
+| 6 | Setlist key/tempo overrides and resets reflect instantly in the UI before server confirms | VERIFIED | `setlist-item-row.tsx`: `onOptimisticUpdate` prop (lines 24-27). `handleKeySave` calls `onOptimisticUpdate` before `startTransition` (lines 172, 174). Same pattern in `handleTempoSave`, `handleResetKey`, `handleResetTempo`. Error reverts via second `onOptimisticUpdate` call. |
 
-**Score:** 5/5 success criteria verified
+**Score:** 6/6 truths verified
 
-### Required Artifacts (Plan 07-01: Database & lib/songs module)
+### Required Artifacts
 
 | Artifact | Expected | Status | Details |
 |----------|----------|--------|---------|
-| `supabase/migrations/00011_songs.sql` | Songs + setlist_items tables, GIN index on tags, RLS policies, triggers, get_popular_tags RPC | ✓ VERIFIED | 118 lines. Contains CREATE TABLE for songs (11 columns) and setlist_items (10 columns), 5 indexes including GIN on tags, 2 RLS policies (SELECT for authenticated), 2 updated_at triggers, get_popular_tags RPC function. |
-| `lib/songs/types.ts` | SongSummary, SetlistItemWithSong, SongLink, PopularTag types | ✓ VERIFIED | 51 lines. Exports all 4 interfaces matching database schema and joined query shapes. |
-| `lib/songs/schemas.ts` | Zod schemas for song CRUD and setlist operations | ✓ VERIFIED | 78 lines. Exports 6 schemas: createSongSchema, updateSongSchema, addToSetlistSchema, removeFromSetlistSchema, reorderSetlistSchema, updateSetlistItemOverridesSchema. Uses z.union for optional fields per MEMORY.md pattern. |
-| `lib/songs/queries.ts` | Query functions for songs and setlists | ✓ VERIFIED | 148 lines. Exports getSongs (with search/filter), getSongById, getSetlistForService, getSongCountsForServices, getPopularTags, getDistinctKeys. Marked "server-only". |
-| `lib/songs/actions.ts` | Server actions for song and setlist mutations | ✓ VERIFIED | 327 lines. Exports 7 server actions: createSong, updateSong, deleteSong, addToSetlist, removeFromSetlist, reorderSetlist, updateSetlistItemOverrides. All use safeParse validation, createAdminClient for writes, and revalidatePath. |
+| `app/(app)/songs/song-table.tsx` | Stable column widths with sort state and clickable headers | VERIFIED | 415 lines. `table-fixed` at line 188. `SortableHeader` component lines 66-97. `sortField`/`sortDir` state. `sortedSongs` useMemo with localeCompare and nulls-last. `ArrowUpDown`/`ArrowUp`/`ArrowDown` icons used. |
+| `app/(app)/songs/song-filters.tsx` | Compact popover-based filter UI replacing inline chips | VERIFIED | 184 lines. `"use client"`. Popover, Button, Select, Badge, SlidersHorizontal, X all imported and rendered. `activeCount` badge. `updateParam` helper with URLSearchParams. Active filter badges with X (lines 161-181). |
+| `app/(app)/songs/page.tsx` | SongFilters replaces FilterChips; same-row layout | VERIFIED | 83 lines. `import { SongFilters } from "./song-filters"` at line 7. `FilterChips` import removed. `SongSearch` and `SongFilters` in same `flex flex-wrap items-center gap-3` row (lines 64-77). Both in `<Suspense>`. |
+| `app/(app)/services/[serviceId]/setlist-panel.tsx` | Optimistic drag-and-drop reordering with local state | VERIFIED | 212 lines. `localItems` state (line 56). `useEffect` sync (lines 59-61). `handleOptimisticUpdate` (lines 79-86). `handleDragEnd` with immediate `setLocalItems` before server (lines 92-119). `onOptimisticUpdate={handleOptimisticUpdate}` passed to each `SetlistItemRow` (line 192). |
+| `app/(app)/services/[serviceId]/setlist-item-row.tsx` | Optimistic override/reset with callback-based parent updates | VERIFIED | 414 lines. `onOptimisticUpdate` in props (lines 24-27). All 4 handlers (`handleKeySave`, `handleTempoSave`, `handleResetKey`, `handleResetTempo`) call `onOptimisticUpdate` immediately and revert on error. |
 
 **Score:** 5/5 artifacts verified
-
-### Required Artifacts (Plan 07-02: Song library UI)
-
-| Artifact | Expected | Status | Details |
-|----------|----------|--------|---------|
-| `app/(app)/songs/page.tsx` | Server component song library page with search params filtering | ✓ VERIFIED | 83 lines. Calls getSongs with search/key/tag filters from URL params, getPopularTags, getDistinctKeys. Renders header with song count badge, SongSearch, FilterChips, SongTableWrapper. |
-| `app/(app)/songs/song-search.tsx` | Client search input with 300ms debounce pushing to URL params | ✓ VERIFIED | 81 lines. Uses useSearchParams and router.replace. Debounces via setTimeout (300ms). Preserves existing key/tag params. |
-| `app/(app)/songs/song-table.tsx` | Dense table rendering songs with edit/delete actions | ✓ VERIFIED | 282 lines. Renders Table (desktop) and Card grid (mobile). Columns: Title, Artist, Key, Tempo, Tags. TagBadges show first 3 + "+N more". DropdownMenu for Edit/Delete actions. |
-| `app/(app)/songs/song-form-dialog.tsx` | Dialog for creating and editing songs with react-hook-form + Zod | ✓ VERIFIED | 413 lines. Uses react-hook-form with zodResolver. Fields: title, artist, defaultKey, defaultTempo, tags (custom pill input), durationSeconds, links (field array), notes. Calls createSong/updateSong server actions. |
-| `app/(app)/songs/filter-chips.tsx` | Key and tag filter chips dynamically populated from DB | ✓ VERIFIED | 116 lines. Renders two rows: key chips (from distinctKeys) and tag chips (from popularTags). Active chip highlighted with bg-primary. Links preserve other params. |
-
-**Score:** 5/5 artifacts verified
-
-### Required Artifacts (Plan 07-03: Setlist builder)
-
-| Artifact | Expected | Status | Details |
-|----------|----------|--------|---------|
-| `app/(app)/services/[serviceId]/service-tabs.tsx` | Client tabs wrapper (Assignments, Setlist, Details) | ✓ VERIFIED | 51 lines. Uses shadcn Tabs with 3 triggers: Assignments, Setlist, Details. Default value "assignments". |
-| `app/(app)/services/[serviceId]/setlist-panel.tsx` | Setlist builder with dnd-kit sortable context | ✓ VERIFIED | 186 lines. Uses DndContext, SortableContext, verticalListSortingStrategy, PointerSensor with distance:5. Calls reorderSetlist on drag end. Renders SongPicker, Browse Library button, and SetlistItemRow list. Empty state with Music icon. |
-| `app/(app)/services/[serviceId]/setlist-item-row.tsx` | Single sortable setlist row with inline override editing | ✓ VERIFIED | 390 lines. Uses useSortable with drag handle. InlineEdit component for key_override, tempo_override, notes. Overridden values in bold + blue (font-bold text-blue-600 dark:text-blue-400). Reset button (RotateCcw icon) to revert to library default. Calls updateSetlistItemOverrides and removeFromSetlist. |
-| `app/(app)/services/[serviceId]/song-picker.tsx` | Inline search combobox for quick song adds | ✓ VERIFIED | 104 lines. Uses Combobox from @base-ui/react. Filters client-side. Shows "in setlist" indicator. Calls addToSetlist server action. |
-| `app/(app)/services/[serviceId]/song-browse-dialog.tsx` | Full library browse dialog using CommandDialog | ✓ VERIFIED | 101 lines. Uses CommandDialog from shadcn/cmdk. Shows all songs with title, artist, key, tempo. Checkmark for songs already in setlist. Calls addToSetlist, keeps dialog open for multiple adds. |
-| `app/(app)/services/[serviceId]/page.tsx` | Refactored service detail page with tabbed layout | ✓ VERIFIED | 358 lines. Calls getSetlistForService and getSongs in Promise.all. Renders ServiceTabs with assignmentsContent, setlistContent, detailsContent. Existing assignment and details sections preserved. |
-| `components/services/service-list.tsx` | Updated service list with song count display | ✓ VERIFIED | Service list renders songCount with Music icon. ServiceListService interface includes songCount?: number. Dashboard page.tsx calls getSongCountsForServices and maps counts onto service objects. |
-
-**Score:** 7/7 artifacts verified
-
-### Additional Artifacts (discovered during verification)
-
-| Artifact | Purpose | Status |
-|----------|---------|--------|
-| `app/(app)/songs/song-table-wrapper.tsx` | Wraps SongTable with Add Song button and dialog state management | ✓ VERIFIED |
 
 ### Key Link Verification
 
-#### Plan 07-01 Links
-
 | From | To | Via | Status | Details |
 |------|-----|-----|--------|---------|
-| lib/songs/queries.ts | supabase songs table | Supabase client query | ✓ WIRED | Lines 23, 52, 135: `supabase.from("songs").select(...)` |
-| lib/songs/actions.ts | lib/songs/schemas.ts | Zod safeParse validation | ✓ WIRED | Lines 29, 73, 147, 195, 256, 288: All actions use `schema.safeParse(data)` |
-| lib/songs/actions.ts | supabase admin client | createAdminClient for writes | ✓ WIRED | Lines 41, 100, 125, 154, 202, 263, 306: All mutations use `createAdminClient()` |
+| `app/(app)/songs/song-filters.tsx` | `app/(app)/songs/page.tsx` | `import { SongFilters }` replaces `FilterChips` | WIRED | page.tsx line 7: `import { SongFilters } from "./song-filters"`. Line 70: `<SongFilters ...>`. `FilterChips` not imported anywhere in codebase. |
+| `app/(app)/services/[serviceId]/setlist-panel.tsx` | `app/(app)/services/[serviceId]/setlist-item-row.tsx` | `onOptimisticUpdate` callback prop | WIRED | setlist-panel.tsx line 192: `onOptimisticUpdate={handleOptimisticUpdate}`. setlist-item-row.tsx lines 24-27: prop interface defined. Lines 172, 194, 227, 246: called before server actions in all 4 handlers. |
 
-#### Plan 07-02 Links
+**Score:** 2/2 key links verified
 
-| From | To | Via | Status | Details |
-|------|-----|-----|--------|---------|
-| app/(app)/songs/page.tsx | lib/songs/queries.ts | getSongs, getPopularTags, getDistinctKeys server calls | ✓ WIRED | Line 5: imports all three functions. Lines 37-45: calls in Promise.all. |
-| app/(app)/songs/song-form-dialog.tsx | lib/songs/actions.ts | createSong/updateSong server action calls | ✓ WIRED | Line 27: imports both actions. Lines 164-165: calls based on edit mode. |
-| app/(app)/songs/song-search.tsx | URL search params | router.replace with debounced query param | ✓ WIRED | Lines 4, 16, 33: useSearchParams, router, router.replace with params. |
+### Git Commit Verification
 
-#### Plan 07-03 Links
+All 3 task commits documented in 07-04-SUMMARY.md verified in git log:
 
-| From | To | Via | Status | Details |
-|------|-----|-----|--------|---------|
-| app/(app)/services/[serviceId]/setlist-panel.tsx | lib/songs/actions.ts | addToSetlist, removeFromSetlist, reorderSetlist | ✓ WIRED | Line 24: imports reorderSetlist. Line 83: calls reorderSetlist on drag end. SongPicker and SongBrowseDialog call addToSetlist. |
-| app/(app)/services/[serviceId]/setlist-item-row.tsx | lib/songs/actions.ts | updateSetlistItemOverrides | ✓ WIRED | Line 12: imports updateSetlistItemOverrides. Lines 167, 184, 198, 212, 226: calls for key, tempo, notes overrides and resets. |
-| app/(app)/services/[serviceId]/page.tsx | lib/songs/queries.ts | getSetlistForService query | ✓ WIRED | Line 24: imports getSetlistForService and getSongs. Line 63: calls in Promise.all. |
-| components/services/service-list.tsx | dashboard page (parent) | songCount prop from getSongCountsForServices | ✓ WIRED | service-list.tsx line 33: ServiceListService interface includes songCount. dashboard/page.tsx line 13: imports getSongCountsForServices, line 43: calls it, line 70: maps counts to services. |
-
-**Score:** 10/10 key links verified
+| Commit | Message | Verified |
+|--------|---------|----------|
+| `b03c57b` | feat(07-04): stabilize song table columns and add client-side sorting | YES |
+| `d95fb57` | feat(07-04): replace inline filter chips with compact Filters popover | YES |
+| `4d53630` | feat(07-04): add optimistic UI to setlist drag-reorder and key/tempo overrides | YES |
 
 ### Requirements Coverage
 
-All requirements from Plan frontmatter:
-
 | Requirement | Source Plan | Description | Status | Evidence |
 |-------------|------------|-------------|--------|----------|
-| SONG-01 | 07-01, 07-02 | Song library with metadata | ✓ SATISFIED | Songs table has title, artist, default_key, default_tempo, tags, duration_seconds, links, notes. Song library UI allows CRUD operations. |
-| SONG-02 | 07-01, 07-02 | Search and filter songs | ✓ SATISFIED | getSongs supports search (ilike on title/artist) and filters (key eq, tag overlaps). SongSearch + FilterChips provide UI. |
-| SONG-03 | 07-01, 07-03 | Build setlist for service | ✓ SATISFIED | Setlist_items table links songs to services. SetlistPanel allows adding songs via picker or browse dialog. |
-| SONG-04 | 07-03 | Drag-and-drop reordering | ✓ SATISFIED | SetlistPanel uses dnd-kit. reorderSetlist server action updates sort_order. |
-| SONG-05 | 07-01, 07-03 | Per-service overrides | ✓ SATISFIED | Setlist_items has key_override, tempo_override, notes columns. SetlistItemRow provides inline editing. updateSetlistItemOverrides server action. |
-| SONG-06 | 07-01, 07-02 | Tags for categorization | ✓ SATISFIED | Songs.tags is text[] with GIN index. get_popular_tags RPC. Tag input in SongFormDialog. FilterChips for tag filtering. |
-| SONG-07 | 07-01, 07-03 | Song count on dashboard | ✓ SATISFIED | getSongCountsForServices query. Dashboard calls it and passes counts to ServiceList for display. |
-
-**Score:** 7/7 requirements satisfied
-
-**Orphaned requirements:** None (all requirements mapped to phase 7 are covered by plans)
+| SONG-02 | 07-04 | Search and filter songs (compact filter UI) | SATISFIED | Compact Filters popover with Key/Tag Select dropdowns. Active badges with X to clear. URL-based filter state preserved. |
+| SONG-03 | 07-04 | Build setlist for service (optimistic UI) | SATISFIED | Optimistic drag-reorder: `localItems` updated before server. Error reverts with toast. |
+| SONG-04 | 07-04 | Drag-and-drop reordering (optimistic) | SATISFIED | `arrayMove` called immediately (line 101-102), persisted via server action in `startTransition`. |
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 |------|------|---------|----------|--------|
-| lib/songs/queries.ts | 92 | Early return `if (serviceIds.length === 0) return {}` | ℹ️ Info | Appropriate guard clause, not a stub |
+| `app/(app)/songs/filter-chips.tsx` | - | Orphaned file (not imported) | Info | No runtime impact. Intentionally left per plan instructions ("Do NOT delete filter-chips.tsx"). Can be removed in cleanup. |
 
-**No blocker or warning anti-patterns found.**
+No blocker or warning anti-patterns found. The "placeholder" grep matches in `song-filters.tsx` and `setlist-item-row.tsx` are legitimate UI input placeholder text.
 
 ### Human Verification Required
 
-#### 1. Song library page visual appearance and UX
+#### 1. Song table column stability with real data
 
-**Test:** Navigate to /songs, add a song with all metadata fields, search by title, filter by key and tag.
+**Test:** Add 10+ songs with long titles (30+ chars), long artist names, and 5+ tags. Inspect the desktop table.
+**Expected:** Columns maintain fixed widths. Long text truncates with ellipsis. Tags cell shows first 3 badges plus "+N more" without expanding the column width.
+**Why human:** CSS truncation and overflow behavior requires visual inspection with real data.
 
-**Expected:**
-- Song library page renders with clean layout
-- Dense table shows all columns (Title, Artist, Key, Tempo, Tags) on desktop
-- Card grid on mobile with stacked info
-- Search bar filters in real-time with 300ms debounce
-- Filter chips highlight active filters and preserve search query
-- Add Song dialog opens with all fields editable
-- Tags can be added by typing + Enter/comma
-- Links support multiple entries with labels
-- Created song appears in table after submission
-- Edit and delete work from dropdown menu
+#### 2. Sort behavior on all four columns
 
-**Why human:** Visual layout, responsive behavior, form UX, real-time debouncing feel
+**Test:** Click Title, Artist, Key, Tempo column headers repeatedly.
+**Expected:** `ArrowUpDown` icon when unsorted, `ArrowUp` when asc, `ArrowDown` when desc. Clicking the active direction a second time returns to unsorted. Nulls always sort to bottom.
+**Why human:** Sort cycling and icon rendering requires visual and interactive verification.
 
-#### 2. Setlist builder drag-and-drop and inline editing
+#### 3. Compact Filters popover UX
 
-**Test:** Navigate to a service detail page, switch to Setlist tab, add songs via inline picker and Browse Library dialog, drag to reorder, click to edit key/tempo/notes inline.
+**Test:** Click the "Filters" button. Select a key filter. Select a tag filter. Verify badges appear with X buttons. Click X on each badge. Click "Clear all filters" inside popover.
+**Expected:** Popover opens with Key and Tag dropdowns. Active badges show "Key: G" with X. Button label shows "Filters (2)". X clears individual filter. "Clear all" clears both.
+**Why human:** Popover open/close state, badge rendering, and URL param updates require visual/interactive testing.
 
-**Expected:**
-- Three tabs render (Assignments, Setlist, Details)
-- Setlist tab shows empty state with Music icon if no songs
-- Inline picker autocompletes as you type, adds song to bottom
-- Browse Library dialog shows all songs with search, multiple adds work
-- Drag handle appears on left, numbered rows (1, 2, 3...)
-- Dragging a song reorders the list and persists
-- Clicking key/tempo/notes opens inline input
-- Overridden values show in bold blue with reset icon
-- Reset button reverts to library default
-- Remove button deletes item and re-numbers remaining
+#### 4. Optimistic drag reorder (instant feedback)
 
-**Why human:** Drag-and-drop feel, inline edit UX, visual feedback for overrides, interaction states
+**Test:** With 3+ songs in setlist, drag a song by its grip handle to a new position.
+**Expected:** Song moves visually IMMEDIATELY (no 2-second delay). Server sync happens in background. If server fails (simulate network cut), song reverts and toast appears.
+**Why human:** Perceived timing of optimistic update vs. server round-trip requires interactive testing.
 
-#### 3. Dashboard song count integration
+#### 5. Optimistic override/reset (instant feedback)
 
-**Test:** Navigate to dashboard, check upcoming services list for song count display.
+**Test:** Click a key value in the setlist. Change it and press Enter. Click the reset icon on the overridden value.
+**Expected:** Bold blue appears immediately on Enter press. Reset reverts immediately. No 3-7 second delay.
+**Why human:** Optimistic UI timing for these interactions requires interactive testing.
 
-**Expected:**
-- Services with setlist items show Music icon + count (e.g., "3 songs")
-- Services without songs show no count
-- Count updates after adding/removing songs from setlist
+## Gap Closure Summary
 
-**Why human:** Visual appearance of song count badge, icon placement
+All 6 UAT issues are resolved by Plan 07-04 (executed 2026-02-27):
 
-#### 4. Song library search and filter performance
+1. **Test 2 (column shifting):** `table-fixed` + `max-w` constraints + `truncate` applied to song-table.tsx.
+2. **Test 4 (filter space waste):** Inline `FilterChips` replaced by `SongFilters` Popover in page.tsx.
+3. **Test 5 (filter space waste):** Same fix — Key and Tag unified in one `SongFilters` popover.
+4. **Test 10 (drag delay):** `localItems` state with immediate `setLocalItems` before server call in setlist-panel.tsx.
+5. **Test 11 (override delay):** `onOptimisticUpdate` callback called before `startTransition` in setlist-item-row.tsx.
+6. **Test 12 (reset delay):** Same optimistic callback pattern for `handleResetKey` and `handleResetTempo`.
 
-**Test:** Add 20+ songs with various keys and tags, then search and filter.
-
-**Expected:**
-- Search debounces smoothly (no lag or jitter)
-- Filter chips update URL params without full page reload
-- Combining search + key filter + tag filter works correctly
-- Results update quickly
-
-**Why human:** Performance feel with larger dataset, smooth URL param updates
+Phase 7 goal is fully achieved. The codebase matches the SUMMARY claims. Phase is ready to proceed to Phase 8.
 
 ---
 
-## Verification Complete
-
-**Status:** passed
-
-**Score:** 13/13 must-haves verified (5 success criteria + 5 artifacts Plan 01 + 5 artifacts Plan 02 + 7 artifacts Plan 03 + 10 key links + 7 requirements - counted as combined score, all verified)
-
-All observable truths verified. All required artifacts exist and are substantive. All key links wired correctly. All requirements satisfied. No blocker anti-patterns found. Phase goal achieved.
-
-**Ready to proceed to next phase.**
-
----
-
-_Verified: 2026-02-24T09:45:00Z_
-
+_Verified: 2026-02-27T06:58:00Z_
 _Verifier: Claude (gsd-verifier)_
+_Re-verification: Yes — gap closure from UAT (Plan 07-04)_
