@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { getUserRole, isAdminOrCommittee } from "@/lib/auth/roles";
 import { getDistinctKeys, getPopularTags, getSongs } from "@/lib/songs/queries";
 import { createClient } from "@/lib/supabase/server";
-import { FilterChips } from "./filter-chips";
+import { SongFilters } from "./song-filters";
 import { SongSearch } from "./song-search";
 import { SongTableWrapper } from "./song-table-wrapper";
 
@@ -60,19 +60,20 @@ export default async function SongLibraryPage({
         </p>
       </div>
 
-      {/* Search + Filter chips */}
-      <div className="flex flex-col gap-3">
+      {/* Search + Filters (same row) */}
+      <div className="flex flex-wrap items-center gap-3">
         <Suspense fallback={null}>
           <SongSearch defaultValue={searchQuery} />
         </Suspense>
 
-        <FilterChips
-          distinctKeys={distinctKeys}
-          popularTags={popularTags}
-          activeKey={keyFilter || undefined}
-          activeTag={tagFilter || undefined}
-          searchQuery={searchQuery || undefined}
-        />
+        <Suspense fallback={null}>
+          <SongFilters
+            distinctKeys={distinctKeys}
+            popularTags={popularTags}
+            activeKey={keyFilter || undefined}
+            activeTag={tagFilter || undefined}
+          />
+        </Suspense>
       </div>
 
       {/* Song table with Add Song button + dialog (client component) */}
